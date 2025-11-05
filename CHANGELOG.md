@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- GitHub repository topics for improved discoverability (aviation, ntsb, accident-analysis, aviation-safety, data-analysis, python, fish-shell, mdb-database, duckdb, jupyter-notebook)
+- Dependabot configuration for automated dependency updates (.github/dependabot.yml)
+- Weekly automated checks for Python (pip) dependencies with 5 PR limit
+- Weekly automated checks for GitHub Actions dependencies with 3 PR limit
+- Repository badges in README.md (repo size, last commit)
+- Project Status section in README.md with version and production-ready status
+- GitHub Topics section in README.md listing all repository topics
+
+### Changed
+- Updated README.md git clone commands with correct GitHub username (doublegate)
+- Enhanced README.md with repository status and topic information
+- Updated CHANGELOG.md version links with correct GitHub username (doublegate)
+- Improved documentation accuracy across all repository references
+
+### Fixed
+- Replaced placeholder YOUR_USERNAME with actual GitHub username (doublegate) in:
+  - README.md line 92: git clone command
+  - CHANGELOG.md lines 205-207: version reference links
+
 ### Planned
 - GitHub Actions CI/CD pipeline for automated testing
 - Docker container support for cross-platform compatibility
@@ -202,6 +222,6 @@ For questions, issues, or contributions:
 - See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines
 - Check [INSTALLATION.md](INSTALLATION.md) for setup help
 
-[Unreleased]: https://github.com/YOUR_USERNAME/NTSB-Dataset_Analysis/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/YOUR_USERNAME/NTSB-Dataset_Analysis/releases/tag/v1.0.0
-[0.1.0]: https://github.com/YOUR_USERNAME/NTSB-Dataset_Analysis/releases/tag/v0.1.0
+[Unreleased]: https://github.com/doublegate/NTSB-Dataset_Analysis/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/doublegate/NTSB-Dataset_Analysis/releases/tag/v1.0.0
+[0.1.0]: https://github.com/doublegate/NTSB-Dataset_Analysis/releases/tag/v0.1.0
