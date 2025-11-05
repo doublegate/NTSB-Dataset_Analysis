@@ -18,29 +18,48 @@ except ImportError:
 
 def load_events_with_coordinates(year_filter: int = 2020):
     """Load events that have valid coordinates"""
+    # Validate year parameter
+    if not isinstance(year_filter, int) or year_filter < 1962 or year_filter > 2100:
+        raise ValueError(f"Invalid year filter: {year_filter}. Must be between 1962 and 2100")
+
     query = f"""
     SELECT
         ev_id,
         ev_date,
         ev_year,
-        ev_state,
-        ev_city,
-        latitude,
-        longitude,
-        inj_tot_f as fatalities,
-        inj_tot_s as serious_injuries,
+        TRIM(ev_state) as ev_state,
+        TRIM(ev_city) as ev_city,
+        TRY_CAST(dec_latitude AS DOUBLE) as latitude,
+        TRY_CAST(dec_longitude AS DOUBLE) as longitude,
+        COALESCE(inj_tot_f, 0) as fatalities,
+        COALESCE(inj_tot_s, 0) as serious_injuries,
         ev_type
     FROM 'data/avall-events.csv'
-    WHERE latitude IS NOT NULL
-      AND longitude IS NOT NULL
-      AND latitude != 0
-      AND longitude != 0
+    WHERE dec_latitude IS NOT NULL
+      AND dec_longitude IS NOT NULL
+      AND TRY_CAST(dec_latitude AS DOUBLE) IS NOT NULL
+      AND TRY_CAST(dec_longitude AS DOUBLE) IS NOT NULL
+      AND TRY_CAST(dec_latitude AS DOUBLE) BETWEEN -90 AND 90
+      AND TRY_CAST(dec_longitude AS DOUBLE) BETWEEN -180 AND 180
+      AND TRY_CAST(dec_latitude AS DOUBLE) != 0
+      AND TRY_CAST(dec_longitude AS DOUBLE) != 0
       AND ev_year >= {year_filter}
+      AND ev_year IS NOT NULL
+      AND ev_id IS NOT NULL
     """
 
-    df = duckdb.query(query).to_df()
-    print(f"📍 Loaded {len(df)} events with coordinates (>= {year_filter})")
-    return df
+    try:
+        df = duckdb.query(query).to_df()
+        print(f"📍 Loaded {len(df):,} events with valid coordinates (>= {year_filter})")
+
+        if len(df) == 0:
+            print(f"⚠️  No events with coordinates found for year >= {year_filter}")
+
+        return df
+
+    except Exception as e:
+        print(f"❌ Error loading coordinate data: {e}")
+        raise
 
 
 def create_accident_map(df: pd.DataFrame, output_file: str = 'outputs/accident_map.html'):
@@ -49,53 +68,77 @@ def create_accident_map(df: pd.DataFrame, output_file: str = 'outputs/accident_m
         print("❌ Cannot create map: geopandas/folium not installed")
         return
 
-    # Create base map centered on US
-    m = folium.Map(
-        location=[39.8283, -98.5795],
-        zoom_start=4,
-        tiles='OpenStreetMap'
-    )
+    if df is None or len(df) == 0:
+        print("⚠️  No data to map")
+        return
 
-    # Create marker cluster
-    marker_cluster = MarkerCluster().add_to(m)
+    try:
+        # Create base map centered on US
+        m = folium.Map(
+            location=[39.8283, -98.5795],
+            zoom_start=4,
+            tiles='OpenStreetMap'
+        )
 
-    # Add markers for each accident
-    for idx, row in df.iterrows():
-        # Create popup text
-        popup_text = f"""
-        <b>Event ID:</b> {row['ev_id']}<br>
-        <b>Date:</b> {row['ev_date']}<br>
-        <b>Location:</b> {row['ev_city']}, {row['ev_state']}<br>
-        <b>Type:</b> {row['ev_type']}<br>
-        <b>Fatalities:</b> {row['fatalities']}<br>
-        <b>Serious Injuries:</b> {row['serious_injuries']}
-        """
+        # Create marker cluster
+        marker_cluster = MarkerCluster().add_to(m)
 
-        # Color code by severity
-        if row['fatalities'] > 0:
-            color = 'red'
-            icon = 'exclamation-triangle'
-        elif row['serious_injuries'] > 0:
-            color = 'orange'
-            icon = 'warning'
-        else:
-            color = 'blue'
-            icon = 'info-sign'
+        # Add markers for each accident
+        markers_added = 0
+        for idx, row in df.iterrows():
+            try:
+                # Validate coordinates
+                lat = float(row['latitude'])
+                lon = float(row['longitude'])
 
-        folium.Marker(
-            location=[row['latitude'], row['longitude']],
-            popup=folium.Popup(popup_text, max_width=300),
-            tooltip=f"{row['ev_city']}, {row['ev_state']}",
-            icon=folium.Icon(color=color, icon=icon)
-        ).add_to(marker_cluster)
+                if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                    continue
 
-    # Create output directory
-    Path('outputs').mkdir(exist_ok=True)
+                # Create popup text with safe string conversion
+                popup_text = f"""
+                <b>Event ID:</b> {row['ev_id']}<br>
+                <b>Date:</b> {row.get('ev_date', 'N/A')}<br>
+                <b>Location:</b> {row.get('ev_city', 'N/A')}, {row.get('ev_state', 'N/A')}<br>
+                <b>Type:</b> {row.get('ev_type', 'N/A')}<br>
+                <b>Fatalities:</b> {row.get('fatalities', 0)}<br>
+                <b>Serious Injuries:</b> {row.get('serious_injuries', 0)}
+                """
 
-    # Save map
-    m.save(output_file)
-    print(f"✅ Map saved to: {output_file}")
-    print(f"   Open in browser to view {len(df)} accident locations")
+                # Color code by severity
+                if row.get('fatalities', 0) > 0:
+                    color = 'red'
+                    icon = 'exclamation-triangle'
+                elif row.get('serious_injuries', 0) > 0:
+                    color = 'orange'
+                    icon = 'warning'
+                else:
+                    color = 'blue'
+                    icon = 'info-sign'
+
+                folium.Marker(
+                    location=[lat, lon],
+                    popup=folium.Popup(popup_text, max_width=300),
+                    tooltip=f"{row.get('ev_city', 'Unknown')}, {row.get('ev_state', 'N/A')}",
+                    icon=folium.Icon(color=color, icon=icon)
+                ).add_to(marker_cluster)
+
+                markers_added += 1
+
+            except (ValueError, TypeError, KeyError) as e:
+                # Skip rows with invalid data
+                continue
+
+        # Create output directory
+        Path('outputs').mkdir(exist_ok=True)
+
+        # Save map
+        m.save(output_file)
+        print(f"✅ Map saved to: {output_file}")
+        print(f"   {markers_added:,} accident locations plotted (from {len(df):,} total events)")
+
+    except Exception as e:
+        print(f"❌ Error creating map: {e}")
+        raise
 
 
 def create_heatmap(df: pd.DataFrame, output_file: str = 'outputs/accident_heatmap.html'):
@@ -104,25 +147,49 @@ def create_heatmap(df: pd.DataFrame, output_file: str = 'outputs/accident_heatma
         print("❌ Cannot create heatmap: geopandas/folium not installed")
         return
 
-    # Create base map
-    m = folium.Map(
-        location=[39.8283, -98.5795],
-        zoom_start=4,
-        tiles='OpenStreetMap'
-    )
+    if df is None or len(df) == 0:
+        print("⚠️  No data for heatmap")
+        return
 
-    # Prepare data for heatmap
-    heat_data = [[row['latitude'], row['longitude']] for idx, row in df.iterrows()]
+    try:
+        # Create base map
+        m = folium.Map(
+            location=[39.8283, -98.5795],
+            zoom_start=4,
+            tiles='OpenStreetMap'
+        )
 
-    # Add heatmap layer
-    HeatMap(heat_data, radius=15, blur=25, max_zoom=13).add_to(m)
+        # Prepare data for heatmap with validation
+        heat_data = []
+        for idx, row in df.iterrows():
+            try:
+                lat = float(row['latitude'])
+                lon = float(row['longitude'])
 
-    # Create output directory
-    Path('outputs').mkdir(exist_ok=True)
+                # Validate coordinates
+                if -90 <= lat <= 90 and -180 <= lon <= 180:
+                    heat_data.append([lat, lon])
+            except (ValueError, TypeError, KeyError):
+                continue
 
-    # Save map
-    m.save(output_file)
-    print(f"✅ Heatmap saved to: {output_file}")
+        if len(heat_data) == 0:
+            print("⚠️  No valid coordinates for heatmap")
+            return
+
+        # Add heatmap layer
+        HeatMap(heat_data, radius=15, blur=25, max_zoom=13).add_to(m)
+
+        # Create output directory
+        Path('outputs').mkdir(exist_ok=True)
+
+        # Save map
+        m.save(output_file)
+        print(f"✅ Heatmap saved to: {output_file}")
+        print(f"   {len(heat_data):,} valid coordinates plotted")
+
+    except Exception as e:
+        print(f"❌ Error creating heatmap: {e}")
+        raise
 
 
 def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fatal_accidents_map.html'):
@@ -131,46 +198,79 @@ def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fat
         print("❌ Cannot create map: geopandas/folium not installed")
         return
 
-    # Filter for fatal accidents
-    fatal_df = df[df['fatalities'] > 0].copy()
-    print(f"🔴 Mapping {len(fatal_df)} fatal accidents")
+    if df is None or len(df) == 0:
+        print("⚠️  No data for fatal accidents map")
+        return
 
-    # Create base map
-    m = folium.Map(
-        location=[39.8283, -98.5795],
-        zoom_start=4,
-        tiles='OpenStreetMap'
-    )
+    try:
+        # Filter for fatal accidents
+        fatal_df = df[df['fatalities'] > 0].copy()
 
-    # Add markers for fatal accidents
-    for idx, row in fatal_df.iterrows():
-        popup_text = f"""
-        <b>Event ID:</b> {row['ev_id']}<br>
-        <b>Date:</b> {row['ev_date']}<br>
-        <b>Location:</b> {row['ev_city']}, {row['ev_state']}<br>
-        <b>Fatalities:</b> {row['fatalities']}<br>
-        """
+        if len(fatal_df) == 0:
+            print("⚠️  No fatal accidents found in dataset")
+            return
 
-        # Size based on number of fatalities
-        radius = min(row['fatalities'] * 2 + 5, 30)
+        print(f"🔴 Mapping {len(fatal_df):,} fatal accidents")
 
-        folium.CircleMarker(
-            location=[row['latitude'], row['longitude']],
-            radius=radius,
-            popup=folium.Popup(popup_text, max_width=300),
-            tooltip=f"{row['fatalities']} fatalities",
-            color='red',
-            fill=True,
-            fillColor='red',
-            fillOpacity=0.6
-        ).add_to(m)
+        # Create base map
+        m = folium.Map(
+            location=[39.8283, -98.5795],
+            zoom_start=4,
+            tiles='OpenStreetMap'
+        )
 
-    # Create output directory
-    Path('outputs').mkdir(exist_ok=True)
+        # Add markers for fatal accidents
+        markers_added = 0
+        for idx, row in fatal_df.iterrows():
+            try:
+                # Validate coordinates
+                lat = float(row['latitude'])
+                lon = float(row['longitude'])
 
-    # Save map
-    m.save(output_file)
-    print(f"✅ Fatal accidents map saved to: {output_file}")
+                if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                    continue
+
+                fatalities = int(row.get('fatalities', 0))
+                if fatalities <= 0:
+                    continue
+
+                popup_text = f"""
+                <b>Event ID:</b> {row['ev_id']}<br>
+                <b>Date:</b> {row.get('ev_date', 'N/A')}<br>
+                <b>Location:</b> {row.get('ev_city', 'N/A')}, {row.get('ev_state', 'N/A')}<br>
+                <b>Fatalities:</b> {fatalities}<br>
+                """
+
+                # Size based on number of fatalities
+                radius = min(fatalities * 2 + 5, 30)
+
+                folium.CircleMarker(
+                    location=[lat, lon],
+                    radius=radius,
+                    popup=folium.Popup(popup_text, max_width=300),
+                    tooltip=f"{fatalities} fatalities",
+                    color='red',
+                    fill=True,
+                    fillColor='red',
+                    fillOpacity=0.6
+                ).add_to(m)
+
+                markers_added += 1
+
+            except (ValueError, TypeError, KeyError):
+                continue
+
+        # Create output directory
+        Path('outputs').mkdir(exist_ok=True)
+
+        # Save map
+        m.save(output_file)
+        print(f"✅ Fatal accidents map saved to: {output_file}")
+        print(f"   {markers_added:,} fatal accidents plotted")
+
+    except Exception as e:
+        print(f"❌ Error creating fatal accidents map: {e}")
+        raise
 
 
 def analyze_by_region():
@@ -178,24 +278,36 @@ def analyze_by_region():
     query = """
     SELECT
         CASE
-            WHEN ev_state IN ('WA', 'OR', 'CA', 'NV', 'ID', 'MT', 'WY', 'UT', 'CO', 'AZ', 'NM', 'AK', 'HI') THEN 'West'
-            WHEN ev_state IN ('ND', 'SD', 'NE', 'KS', 'MN', 'IA', 'MO', 'WI', 'IL', 'IN', 'MI', 'OH') THEN 'Midwest'
-            WHEN ev_state IN ('TX', 'OK', 'AR', 'LA', 'MS', 'AL', 'TN', 'KY', 'WV', 'VA', 'NC', 'SC', 'GA', 'FL') THEN 'South'
-            WHEN ev_state IN ('PA', 'NY', 'VT', 'NH', 'ME', 'MA', 'RI', 'CT', 'NJ', 'DE', 'MD', 'DC') THEN 'Northeast'
+            WHEN TRIM(ev_state) IN ('WA', 'OR', 'CA', 'NV', 'ID', 'MT', 'WY', 'UT', 'CO', 'AZ', 'NM', 'AK', 'HI') THEN 'West'
+            WHEN TRIM(ev_state) IN ('ND', 'SD', 'NE', 'KS', 'MN', 'IA', 'MO', 'WI', 'IL', 'IN', 'MI', 'OH') THEN 'Midwest'
+            WHEN TRIM(ev_state) IN ('TX', 'OK', 'AR', 'LA', 'MS', 'AL', 'TN', 'KY', 'WV', 'VA', 'NC', 'SC', 'GA', 'FL') THEN 'South'
+            WHEN TRIM(ev_state) IN ('PA', 'NY', 'VT', 'NH', 'ME', 'MA', 'RI', 'CT', 'NJ', 'DE', 'MD', 'DC') THEN 'Northeast'
             ELSE 'Other'
         END as region,
         COUNT(*) as accident_count,
-        SUM(inj_tot_f) as total_fatalities
+        COALESCE(SUM(inj_tot_f), 0) as total_fatalities
     FROM 'data/avall-events.csv'
     WHERE ev_state IS NOT NULL
+      AND TRIM(ev_state) != ''
+      AND LENGTH(TRIM(ev_state)) > 0
     GROUP BY region
     ORDER BY accident_count DESC
     """
 
-    df = duckdb.query(query).to_df()
-    print("\n📊 Accidents by Region:")
-    print(df.to_string(index=False))
-    return df
+    try:
+        df = duckdb.query(query).to_df()
+
+        if len(df) == 0:
+            print("⚠️  No regional data found")
+            return None
+
+        print("\n📊 Accidents by Region:")
+        print(df.to_string(index=False))
+        return df
+
+    except Exception as e:
+        print(f"❌ Error in regional analysis: {e}")
+        raise
 
 
 if __name__ == '__main__':
