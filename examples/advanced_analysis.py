@@ -9,7 +9,7 @@ from pathlib import Path
 
 def load_data_with_duckdb(table_name: str, year_filter: int = None) -> pd.DataFrame:
     """Load data efficiently using DuckDB"""
-    query = f"SELECT * FROM 'data/{table_name}.csv'"
+    query = f"SELECT * FROM 'data/avall-{table_name}.csv'"
     if year_filter:
         query += f" WHERE ev_year >= {year_filter}"
     return duckdb.query(query).to_df()
@@ -26,7 +26,7 @@ def analyze_trends_by_year():
         SUM(inj_tot_f) as total_fatalities,
         SUM(inj_tot_s) as total_serious_injuries,
         AVG(inj_tot_f) as avg_fatalities_per_event
-    FROM 'data/events.csv'
+    FROM 'data/avall-events.csv'
     WHERE ev_year IS NOT NULL
     GROUP BY ev_year
     ORDER BY ev_year DESC
@@ -48,8 +48,8 @@ def analyze_by_aircraft_type():
         a.acft_model as model,
         COUNT(*) as accident_count,
         SUM(e.inj_tot_f) as total_fatalities
-    FROM 'data/events.csv' e
-    JOIN 'data/aircraft.csv' a ON e.ev_id = a.ev_id
+    FROM 'data/avall-events.csv' e
+    JOIN 'data/avall-aircraft.csv' a ON e.ev_id = a.ev_id
     WHERE a.acft_make IS NOT NULL AND a.acft_make != ''
     GROUP BY a.acft_make, a.acft_model
     ORDER BY accident_count DESC
@@ -71,7 +71,7 @@ def analyze_geographic_patterns():
         COUNT(*) as total_events,
         SUM(inj_tot_f) as total_fatalities,
         ROUND(AVG(inj_tot_f), 2) as avg_fatalities
-    FROM 'data/events.csv'
+    FROM 'data/avall-events.csv'
     WHERE ev_state IS NOT NULL AND ev_state != ''
     GROUP BY ev_state
     ORDER BY total_events DESC
@@ -145,7 +145,7 @@ def fatal_vs_nonfatal_comparison():
         END as accident_type,
         COUNT(*) as count,
         ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
-    FROM 'data/events.csv'
+    FROM 'data/avall-events.csv'
     GROUP BY accident_type
     """
 
@@ -162,7 +162,7 @@ def seasonal_analysis():
     SELECT
         CAST(SUBSTR(ev_date, 6, 2) AS INTEGER) as month,
         COUNT(*) as accident_count
-    FROM 'data/events.csv'
+    FROM 'data/avall-events.csv'
     WHERE ev_date IS NOT NULL AND LENGTH(ev_date) >= 7
     GROUP BY month
     ORDER BY month
@@ -196,8 +196,8 @@ def export_summary_report(output_file: str = 'outputs/summary_report.csv'):
         e.inj_tot_s as serious_injuries,
         e.inj_tot_m as minor_injuries,
         e.inj_tot_n as no_injuries
-    FROM 'data/events.csv' e
-    LEFT JOIN 'data/aircraft.csv' a ON e.ev_id = a.ev_id
+    FROM 'data/avall-events.csv' e
+    LEFT JOIN 'data/avall-aircraft.csv' a ON e.ev_id = a.ev_id
     WHERE e.ev_year >= 2020
     ORDER BY e.ev_date DESC
     """
@@ -220,8 +220,8 @@ if __name__ == '__main__':
     print("=" * 60)
 
     # Check if data exists
-    if not Path('data/events.csv').exists():
-        print("\n❌ Error: data/events.csv not found")
+    if not Path('data/avall-events.csv').exists():
+        print("\n❌ Error: data/avall-events.csv not found")
         print("   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb")
         exit(1)
 
