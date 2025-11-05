@@ -1,11 +1,28 @@
 # NTSB Aviation Accident Database Analysis
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub repo size](https://img.shields.io/github/repo-size/doublegate/NTSB-Dataset_Analysis)](https://github.com/doublegate/NTSB-Dataset_Analysis)
+[![GitHub last commit](https://img.shields.io/github/last-commit/doublegate/NTSB-Dataset_Analysis)](https://github.com/doublegate/NTSB-Dataset_Analysis/commits/main)
 [![Data Source: NTSB](https://img.shields.io/badge/Data-NTSB-blue.svg)](https://www.ntsb.gov/Pages/AviationQueryV2.aspx)
 [![Fish Shell](https://img.shields.io/badge/Shell-Fish-green.svg)](https://fishshell.com/)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 
 Complete archive and analysis toolkit for National Transportation Safety Board (NTSB) aviation accident investigation data from 1962 to present. This repository provides comprehensive tools for extracting, querying, analyzing, and visualizing aviation accident data across 60+ years of aviation history.
+
+## Project Status
+
+**Version**: 1.0.0
+**Status**: Production-ready
+**Last Updated**: November 2025
+
+This repository is fully functional and production-ready with:
+- Three comprehensive databases (1962-present, 1.6GB total)
+- Complete extraction and analysis toolkit
+- Automated setup scripts for CachyOS/Arch Linux
+- Comprehensive documentation and examples
+- Active maintenance and monthly data updates (avall.mdb)
+
+**Repository Topics**: aviation, ntsb, accident-analysis, aviation-safety, data-analysis, python, fish-shell, mdb-database, duckdb, jupyter-notebook
 
 ## Table of Contents
 
@@ -89,7 +106,7 @@ Get started analyzing NTSB data in under 5 minutes:
 ### 1. Clone the Repository
 
 ```fish
-git clone https://github.com/YOUR_USERNAME/NTSB-Dataset_Analysis.git
+git clone https://github.com/doublegate/NTSB-Dataset_Analysis.git
 cd NTSB-Dataset_Analysis
 ```
 
