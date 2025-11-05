@@ -1,0 +1,191 @@
+# NTSB Dataset Analysis - Git Ignore File
+
+# ============================================================================
+# IMPORTANT: Do NOT ignore the .mdb database files in datasets/
+# These are the core data files and MUST be committed to the repository
+# ============================================================================
+
+# Generated data exports (CSVs extracted from MDB files)
+data/*.csv
+data/*.parquet
+data/*.arrow
+data/*.feather
+data/*.hdf5
+data/*.h5
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
+# BUT explicitly keep the datasets directory with .mdb files
+!datasets/
+!datasets/*.mdb
+!datasets/*.MDB
+
+# Python
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.pytype/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.iml
+*.code-workspace
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+*.kate-swp
+*.swp
+*.swo
+*~
+
+# System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+.AppleDouble
+.LSOverride
+.directory
+.Trash-*
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Temporary Files
+*.tmp
+*.temp
+tmp/
+temp/
+.tmp/
+.~lock.*
+
+# Analysis Outputs
+outputs/
+figures/
+plots/
+results/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.html
+
+# SQLite databases (generated - not source .mdb files)
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# DuckDB
+*.duckdb
+
+# R (if using R for analysis)
+.Rhistory
+.RData
+.Rproj.user
+
+# Rust/Cargo (if compiling Rust tools locally)
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Compressed Archives
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.7z
+*.rar
+
+# Quarto
+.quarto/
+*_cache/
+*_files/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.envrc
+
+# Fish Shell
+.fish_history
+fish_variables
+
+# Backup Files
+*.bak
+*.backup
+*.old
+
+# PDF outputs (but keep ref_docs/*.pdf)
+*.pdf
+!ref_docs/*.pdf
+
+# Keep Important Directories
+!data/.gitkeep
+!outputs/.gitkeep
+!figures/.gitkeep
+!datasets/
+!datasets/*.mdb
+!datasets/*.MDB
+!ref_docs/
+!scripts/
+!examples/
