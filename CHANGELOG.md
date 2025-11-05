@@ -7,26 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- GitHub repository topics for improved discoverability (aviation, ntsb, accident-analysis, aviation-safety, data-analysis, python, fish-shell, mdb-database, duckdb, jupyter-notebook)
-- Dependabot configuration for automated dependency updates (.github/dependabot.yml)
-- Weekly automated checks for Python (pip) dependencies with 5 PR limit
-- Weekly automated checks for GitHub Actions dependencies with 3 PR limit
-- Repository badges in README.md (repo size, last commit)
-- Project Status section in README.md with version and production-ready status
-- GitHub Topics section in README.md listing all repository topics
-
-### Changed
-- Updated README.md git clone commands with correct GitHub username (doublegate)
-- Enhanced README.md with repository status and topic information
-- Updated CHANGELOG.md version links with correct GitHub username (doublegate)
-- Improved documentation accuracy across all repository references
-
-### Fixed
-- Replaced placeholder YOUR_USERNAME with actual GitHub username (doublegate) in:
-  - README.md line 92: git clone command
-  - CHANGELOG.md lines 205-207: version reference links
-
 ### Planned
 - GitHub Actions CI/CD pipeline for automated testing
 - Docker container support for cross-platform compatibility
@@ -34,6 +14,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Additional example analyses (time series forecasting, ML models)
 - Integration with FAA aircraft registry data
 - Automated monthly updates of avall.mdb database
+
+## [1.0.1] - 2025-11-05
+
+### Added
+- Comprehensive error handling across all Python example scripts
+- Input parameter validation (year ranges, coordinate bounds)
+- Data quality validation in SQL queries (TRY_CAST, COALESCE, TRIM)
+- Detailed statistics output in quick_analysis.py
+- Marker count tracking in geospatial map functions
+- Regional accident analysis in geospatial_analysis.py
+- Recent Improvements section in README.md documenting v1.0.1 changes
+- Testing Results section in README.md with verified script outputs
+
+### Fixed
+- **CRITICAL**: Geospatial script coordinate column bug
+  - Changed from DMS format columns (latitude/longitude) to decimal columns (dec_latitude/dec_longitude)
+  - Now successfully loads 7,903 events with coordinates (was 0 before)
+  - Creates all 3 interactive maps successfully
+
+- **CRITICAL**: Seasonal analysis date parsing crash
+  - Fixed "Conversion Error: Could not convert string '/0' to INT32"
+  - Added TRY_CAST, regex validation, and BETWEEN checks
+  - Analysis continues with warning instead of crashing
+
+- CSV file path references in Python examples
+  - Updated from generic names (events.csv) to database-prefixed (avall-events.csv)
+  - Matches extraction script output format
+
+### Changed
+- All SQL queries now use defensive programming techniques
+  - COALESCE for NULL aggregations
+  - TRIM for string fields
+  - LENGTH validation for non-empty strings
+  - TRY_CAST for safe type conversions
+  - Explicit range validation (years, coordinates)
+
+- Enhanced user feedback
+  - Formatted numbers with thousand separators
+  - Clear warning messages for data quality issues
+  - Actionable error messages with suggestions
+  - Progress indicators for long operations
+
+- Updated Quick Start section in README.md with production-ready script examples
+- Updated Project Status in README.md to version 1.0.1
+
+### Technical Details
+- **Coordinate Format Discovery**: NTSB database stores coordinates in two formats:
+  - `latitude`/`longitude`: DMS format (e.g., "043594N", "0883325W")
+  - `dec_latitude`/`dec_longitude`: Decimal degrees (e.g., 43.98, -88.55)
+  - Geospatial script now uses decimal columns for mapping
+
+- **Data Quality Handling**: Scripts now gracefully handle:
+  - Invalid/malformed dates (e.g., "/0", partial dates)
+  - NULL values in injury, location, and aircraft fields
+  - Empty strings vs NULL distinction
+  - Whitespace-only strings
+  - Invalid coordinate ranges
+  - Zero coordinates (0, 0)
+  - Type conversion failures
+
+### Testing
+- All three example scripts tested and verified working
+- quick_analysis.py: 100 events, 250 fatalities, 48 serious injuries
+- advanced_analysis.py: 29,773 events across 5 analyses, top aircraft Cessna 172 (643)
+- geospatial_analysis.py: 7,903 events, 3 interactive maps, 1,389 fatal accidents
+- Regional breakdown: West (9,442), South (8,142), Midwest (4,339)
 
 ## [1.0.0] - 2025-11-05
 
@@ -222,6 +268,7 @@ For questions, issues, or contributions:
 - See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines
 - Check [INSTALLATION.md](INSTALLATION.md) for setup help
 
-[Unreleased]: https://github.com/doublegate/NTSB-Dataset_Analysis/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/doublegate/NTSB-Dataset_Analysis/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/doublegate/NTSB-Dataset_Analysis/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/doublegate/NTSB-Dataset_Analysis/releases/tag/v1.0.0
 [0.1.0]: https://github.com/doublegate/NTSB-Dataset_Analysis/releases/tag/v0.1.0
