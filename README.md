@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Database Size](https://img.shields.io/badge/Database%20Size-1.6%20GB-blue.svg)](https://github.com/doublegate/NTSB-Dataset_Analysis)
-[![GitHub last commit](https://img.shields.io/github/last-commit/doublegate/NTSB-Dataset_Analysis)](https://github.com/doublegate/NTSB-Dataset_Analysis/commits/main)
+[![Last Commit](https://img.shields.io/github/last-commit/doublegate/NTSB-Dataset_Analysis?label=Last%20Commit)](https://github.com/doublegate/NTSB-Dataset_Analysis/commits/main)
 [![Data Source: NTSB](https://img.shields.io/badge/Data-NTSB-blue.svg)](https://www.ntsb.gov/Pages/AviationQueryV2.aspx)
 [![Fish Shell](https://img.shields.io/badge/Shell-Fish-green.svg)](https://fishshell.com/)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
