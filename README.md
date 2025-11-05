@@ -1,7 +1,7 @@
 # NTSB Aviation Accident Database Analysis
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub repo size](https://img.shields.io/github/repo-size/doublegate/NTSB-Dataset_Analysis)](https://github.com/doublegate/NTSB-Dataset_Analysis)
+[![Database Size](https://img.shields.io/badge/Database%20Size-1.6%20GB-blue.svg)](https://github.com/doublegate/NTSB-Dataset_Analysis)
 [![GitHub last commit](https://img.shields.io/github/last-commit/doublegate/NTSB-Dataset_Analysis)](https://github.com/doublegate/NTSB-Dataset_Analysis/commits/main)
 [![Data Source: NTSB](https://img.shields.io/badge/Data-NTSB-blue.svg)](https://www.ntsb.gov/Pages/AviationQueryV2.aspx)
 [![Fish Shell](https://img.shields.io/badge/Shell-Fish-green.svg)](https://fishshell.com/)
