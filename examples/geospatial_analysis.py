@@ -30,7 +30,7 @@ def load_events_with_coordinates(year_filter: int = 2020):
         inj_tot_f as fatalities,
         inj_tot_s as serious_injuries,
         ev_type
-    FROM 'data/events.csv'
+    FROM 'data/avall-events.csv'
     WHERE latitude IS NOT NULL
       AND longitude IS NOT NULL
       AND latitude != 0
@@ -186,7 +186,7 @@ def analyze_by_region():
         END as region,
         COUNT(*) as accident_count,
         SUM(inj_tot_f) as total_fatalities
-    FROM 'data/events.csv'
+    FROM 'data/avall-events.csv'
     WHERE ev_state IS NOT NULL
     GROUP BY region
     ORDER BY accident_count DESC
@@ -203,8 +203,8 @@ if __name__ == '__main__':
     print("=" * 60)
 
     # Check if data exists
-    if not Path('data/events.csv').exists():
-        print("\n❌ Error: data/events.csv not found")
+    if not Path('data/avall-events.csv').exists():
+        print("\n❌ Error: data/avall-events.csv not found")
         print("   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb")
         exit(1)
 

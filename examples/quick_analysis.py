@@ -15,7 +15,7 @@ def analyze_recent_events(year=2023):
         ev_city,
         inj_tot_f as fatalities,
         inj_tot_s as serious_injuries
-    FROM 'data/events.csv'
+    FROM 'data/avall-events.csv'
     WHERE ev_year >= {year}
     ORDER BY ev_date DESC
     LIMIT 100
@@ -25,7 +25,7 @@ def analyze_recent_events(year=2023):
 
 # Example: Read with pandas
 def load_events():
-    return pd.read_csv('data/events.csv')
+    return pd.read_csv('data/avall-events.csv')
 
 if __name__ == '__main__':
     print("📊 Loading recent events...")
