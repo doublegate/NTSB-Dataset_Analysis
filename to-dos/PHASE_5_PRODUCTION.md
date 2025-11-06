@@ -1093,5 +1093,5 @@ export default function () {
 
 ---
 
-**Last Updated**: January 2025
+**Last Updated**: November 2025
 **Version**: 1.0

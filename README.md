@@ -11,14 +11,16 @@ Complete archive and analysis toolkit for National Transportation Safety Board (
 
 ## Project Status
 
-**Version**: 1.1.0
-**Status**: Production-ready with comprehensive documentation
+**Version**: 1.2.0
+**Status**: Production-ready with PostgreSQL database and comprehensive documentation
 **Last Updated**: November 2025
 
 This repository is fully functional and production-ready with:
-- Three comprehensive databases (1962-present, 1.6GB total)
+- Three comprehensive databases (1962-present, 1.6GB MDB files)
+- PostgreSQL database (966 MB, 92,771 events, 726,969 total rows)
+- Automated database setup and ETL pipelines
 - Complete extraction and analysis toolkit
-- Automated setup scripts for CachyOS/Arch Linux
+- Query optimization with materialized views and indexes
 - Comprehensive documentation and examples
 - Active maintenance and monthly data updates (avall.mdb)
 - Production-ready Python examples with robust error handling
@@ -52,25 +54,45 @@ This repository is fully functional and production-ready with:
 ## Features
 
 - **Three comprehensive databases** spanning 1962-present with 60+ years of accident data
-- **Automated extraction scripts** for converting MDB databases to CSV/SQLite formats
-- **Fast SQL query tools** using DuckDB for rapid data analytics
+- **PostgreSQL database** with optimized schema, materialized views, and 59 indexes
+- **Automated database setup** (`setup_database.sh`) for one-command initialization
+- **Production-grade ETL pipelines** with staging tables and duplicate detection
+- **Automated extraction scripts** for converting MDB databases to CSV/SQLite/PostgreSQL formats
+- **Fast SQL query tools** using DuckDB and PostgreSQL for rapid data analytics
+- **Query optimization** with 6 materialized views for common analytical queries
+- **Data validation framework** with comprehensive quality checks
 - **Python analysis examples** with pandas, polars, and visualization libraries
-- **Geospatial analysis** capabilities with mapping and hotspot identification
+- **Geospatial analysis** capabilities with PostGIS, mapping and hotspot identification
 - **Text mining tools** for analyzing accident narratives and investigation reports
 - **Jupyter notebooks** for interactive data exploration
 - **Complete documentation** including database schema, coding manual references, and installation guides
 - **Fish shell scripts** for streamlined workflow automation
-- **Cross-format support** (MDB, CSV, SQLite, Parquet) for flexible analysis
+- **Cross-format support** (MDB, CSV, SQLite, PostgreSQL, Parquet) for flexible analysis
 
 ## 📊 Datasets
 
-This repository contains three comprehensive Microsoft Access databases:
+This repository contains three comprehensive Microsoft Access databases and an optimized PostgreSQL database:
+
+### Source Databases (MDB Files)
 
 | Database | Time Period | Size | Records |
 |----------|-------------|------|---------|
 | `datasets/avall.mdb` | 2008 - Present | 537 MB | Updated monthly |
 | `datasets/Pre2008.mdb` | 1982 - 2007 | 893 MB | Static snapshot |
 | `datasets/PRE1982.MDB` | 1962 - 1981 | 188 MB | Static snapshot |
+
+### PostgreSQL Database
+
+| Database | Events | Total Rows | Size | Coverage |
+|----------|--------|------------|------|----------|
+| `ntsb_aviation` | 92,771 | 726,969 | 966 MB | 1977-2025 (48 years) |
+
+**Features:**
+- Optimized schema with PostGIS for geospatial analysis
+- 6 materialized views for fast analytical queries
+- 59 indexes for query performance
+- Data validation and referential integrity
+- Automated ETL pipeline with duplicate detection
 
 ## Database Structure
 
@@ -111,35 +133,45 @@ NTSB uses a hierarchical coding system to classify accidents (see `ref_docs/codm
 
 Get started analyzing NTSB data in under 5 minutes:
 
-### 1. Clone the Repository
+### Option A: PostgreSQL Database (Recommended)
 
-```fish
+For optimal query performance and advanced analytics:
+
+```bash
+# 1. Clone the repository
 git clone https://github.com/doublegate/NTSB-Dataset_Analysis.git
 cd NTSB-Dataset_Analysis
+
+# 2. Setup PostgreSQL database (one command)
+./scripts/setup_database.sh
+
+# 3. Load data
+source .venv/bin/activate
+python scripts/load_with_staging.py --source datasets/avall.mdb
+
+# 4. Start querying
+psql -d ntsb_aviation -c "SELECT COUNT(*) FROM events;"
 ```
 
-### 2. Automated Setup
+See [QUICKSTART_POSTGRESQL.md](QUICKSTART_POSTGRESQL.md) for detailed PostgreSQL setup and usage.
+
+### Option B: CSV/DuckDB Analysis
+
+For quick exploration without database setup:
 
 ```fish
-# Install all required tools (mdbtools, Python, Rust tools, etc.)
-./setup.fish
+# 1. Clone the repository
+git clone https://github.com/doublegate/NTSB-Dataset_Analysis.git
+cd NTSB-Dataset_Analysis
 
-# Activate Python environment
+# 2. Automated Setup
+./setup.fish  # Install tools: mdbtools, Python, Rust tools
 source .venv/bin/activate.fish
-```
 
-### 3. Extract Data from Databases
-
-```fish
-# Extract all tables with database-prefixed naming
+# 3. Extract Data from Databases
 ./scripts/extract_all_tables.fish datasets/avall.mdb
-```
 
-### 4. Start Analyzing
-
-All example scripts are production-ready and work out-of-the-box:
-
-```fish
+# 4. Start Analyzing
 # Quick analysis (100 recent events)
 .venv/bin/python examples/quick_analysis.py
 
@@ -183,20 +215,63 @@ This installs:
 
 Comprehensive documentation is available:
 
+### Getting Started
+- **[QUICKSTART_POSTGRESQL.md](QUICKSTART_POSTGRESQL.md)** - PostgreSQL database setup and usage
+- **[QUICKSTART.md](QUICKSTART.md)** - CSV/DuckDB analysis workflow
 - **[INSTALLATION.md](INSTALLATION.md)** - Complete setup guide for CachyOS/Arch Linux
-- **[QUICKSTART.md](QUICKSTART.md)** - Essential commands and common workflows
+
+### Technical Documentation
 - **[TOOLS_AND_UTILITIES.md](TOOLS_AND_UTILITIES.md)** - Comprehensive tool catalog
 - **[CLAUDE.md](CLAUDE.md)** - Repository structure and database schema reference
 - **[scripts/README.md](scripts/README.md)** - Detailed Fish shell script documentation
 - **[examples/README.md](examples/README.md)** - Python analysis examples guide
+
+### Sprint Reports & Progress
+- **[SPRINT_1_REPORT.md](SPRINT_1_REPORT.md)** - Phase 1 Sprint 1 completion (PostgreSQL migration)
+- **[SPRINT_2_COMPLETION_REPORT.md](SPRINT_2_COMPLETION_REPORT.md)** - Phase 1 Sprint 2 progress (query optimization, historical data)
+- **[docs/PRE1982_ANALYSIS.md](docs/PRE1982_ANALYSIS.md)** - PRE1982.MDB schema analysis and integration strategy
+
+### Reference Documentation
 - **ref_docs/** - Official NTSB schema documentation and coding manuals
   - `eadmspub.pdf` - Database schema and entity relationships
   - `codman.pdf` - Aviation coding manual
   - `MDB_Release_Notes.pdf` - Database release notes
+  - `eadmspub_legacy.pdf` - Legacy schema for PRE1982.MDB
 
 ## Example Queries
 
-### SQL Queries (using DuckDB)
+### PostgreSQL Queries (Recommended)
+
+```sql
+-- Recent fatal accidents with aircraft details
+SELECT e.ev_id, e.ev_date, e.ev_type, e.ev_state, e.inj_tot_f,
+       a.acft_make, a.acft_model
+FROM events e
+JOIN aircraft a ON e.ev_id = a.ev_id
+WHERE e.inj_tot_f > 0 AND e.ev_year >= 2020
+ORDER BY e.ev_date DESC
+LIMIT 100;
+
+-- Yearly accident statistics (from materialized view)
+SELECT * FROM mv_yearly_stats
+WHERE year >= 2020
+ORDER BY year DESC;
+
+-- Top 10 aircraft types by accident count
+SELECT * FROM mv_aircraft_stats
+ORDER BY total_accidents DESC
+LIMIT 10;
+
+-- Geospatial query: accidents near a location
+SELECT ev_id, ev_date, ev_state,
+       ST_Distance(location_geom, ST_MakePoint(-122.4194, 37.7749)) as distance_meters
+FROM events
+WHERE location_geom IS NOT NULL
+  AND ST_DWithin(location_geom, ST_MakePoint(-122.4194, 37.7749), 50000)
+ORDER BY distance_meters;
+```
+
+### DuckDB Queries (CSV files)
 ```sql
 -- Recent fatal accidents
 SELECT ev_id, ev_date, ev_type, ev_state, inj_tot_f
@@ -244,8 +319,10 @@ csvjson data/events.csv > events.json
 ## Recommended Tools
 
 ### Database Access
+- **PostgreSQL** - Primary analytical database (recommended)
+- **PostGIS** - Geospatial extensions for PostgreSQL
+- **pgAdmin** / **DBeaver** - Database GUI tools
 - **mdbtools** - Extract data from .mdb files
-- **DBeaver** - Universal database GUI
 - **DuckDB** - Fast SQL analytics on CSV/Parquet
 - **SQLite** - Convert MDB for easier querying
 
