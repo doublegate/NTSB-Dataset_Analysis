@@ -2,7 +2,7 @@
 
 Open research questions, experimental techniques, and academic collaboration opportunities.
 
-**Last Updated**: January 2025
+**Last Updated**: November 2025
 
 ---
 
@@ -483,5 +483,5 @@ Open research questions, experimental techniques, and academic collaboration opp
 
 ---
 
-**Last Updated**: January 2025
+**Last Updated**: November 2025
 **Version**: 1.0
