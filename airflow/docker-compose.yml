@@ -1,6 +1,3 @@
----
-version: '3.8'
-
 # ====================================================================================================
 # Apache Airflow Docker Compose Configuration
 # ====================================================================================================
@@ -12,8 +9,11 @@ version: '3.8'
 
 x-airflow-common:
   &airflow-common
-  # Use official Apache Airflow image
-  image: apache/airflow:2.7.3
+  # Use custom Airflow image with unzip and postgresql-client-18
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: ntsb-airflow:2.7.3-custom
   environment:
     &airflow-common-env
     # Core settings
@@ -21,7 +21,7 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
     AIRFLOW__CORE__PARALLELISM: 10
-    AIRFLOW__CORE__DAG_CONCURRENCY: 5
+    AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: 5
     AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG: 1
 
     # Database (Airflow metadata)
@@ -51,6 +51,12 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
+    # Mount scripts directory for load_with_staging.py access
+    - ${AIRFLOW_PROJ_DIR:-.}/../scripts:/opt/airflow/scripts
+    # Mount datasets directory for MDB files
+    - ${AIRFLOW_PROJ_DIR:-.}/../datasets:/opt/airflow/datasets
+    # Mount /tmp/NTSB_Datasets for downloads and backups
+    - /tmp/NTSB_Datasets:/tmp/NTSB_Datasets
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on

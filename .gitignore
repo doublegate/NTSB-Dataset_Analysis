@@ -1,9 +1,16 @@
 # NTSB Dataset Analysis - Git Ignore File
 
 # ============================================================================
-# IMPORTANT: Do NOT ignore the .mdb database files in datasets/
-# These are the core data files and MUST be committed to the repository
+# Database Files: .mdb files are LARGE (500MB-900MB) binary source data
+# These should be downloaded from NTSB website, not committed to git
+# See README.md for download instructions
 # ============================================================================
+
+# Source database files (download from NTSB)
+datasets/*.mdb
+datasets/*.MDB
+datasets/*.accdb
+datasets/*.ACCDB
 
 # Generated data exports (CSVs extracted from MDB files)
 data/*.csv
@@ -16,11 +23,6 @@ data/*.h5
 data/*.db
 data/*.sqlite
 data/*.sqlite3
-
-# BUT explicitly keep the datasets directory with .mdb files
-!datasets/
-!datasets/*.mdb
-!datasets/*.MDB
 
 # Python
 .venv/
@@ -187,6 +189,14 @@ airflow/logs/
 airflow/__pycache__/
 airflow/dags/__pycache__/
 airflow/plugins/__pycache__/
+airflow/**/*.pyc
+airflow/airflow.db
+airflow/airflow.cfg
+airflow/webserver_config.py
+airflow/airflow-webserver.pid
+airflow/dags/*_test_dag.py
+airflow/dags/*_hello_*.py
+docker-compose.override.yml
 
 # Backup Files
 *.bak
@@ -202,8 +212,6 @@ airflow/plugins/__pycache__/
 !outputs/.gitkeep
 !figures/.gitkeep
 !datasets/
-!datasets/*.mdb
-!datasets/*.MDB
 !ref_docs/
 !scripts/
 !examples/
