@@ -11,19 +11,50 @@ Complete archive and analysis toolkit for National Transportation Safety Board (
 
 ## Project Status
 
-**Version**: 1.2.0
-**Status**: Production-ready with PostgreSQL database and comprehensive documentation
-**Last Updated**: November 2025
+**Version**: 2.0.0
+**Status**: Production-ready with high-performance PostgreSQL database and automated ETL
+**Last Updated**: November 6, 2025
+**Current Sprint**: Phase 1 Sprint 2 - ✅ COMPLETE
 
 This repository is fully functional and production-ready with:
 - Three comprehensive databases (1962-present, 1.6GB MDB files)
-- PostgreSQL database (966 MB, 92,771 events, 726,969 total rows)
-- Automated database setup and ETL pipelines
+- High-performance PostgreSQL database (966 MB, 92,771 events, 726,969 total rows)
+- Query optimization: 6 materialized views, 59 indexes (30-114x speedup)
+- Performance: p50 2ms, p95 13ms, 98.81% buffer cache hit ratio
+- Automated one-command database setup (no manual SQL required)
+- Production-grade ETL with staging tables and duplicate detection
+- Comprehensive data validation suite
 - Complete extraction and analysis toolkit
-- Query optimization with materialized views and indexes
-- Comprehensive documentation and examples
 - Active maintenance and monthly data updates (avall.mdb)
 - Production-ready Python examples with robust error handling
+
+### Sprint 2 Achievements (November 2025)
+
+✅ **Query Optimization**
+- 6 materialized views (yearly, state, aircraft, decade, crew, findings)
+- 59 total indexes (30 base + 29 performance/MV indexes)
+- 30-114x speedup for analytical queries
+- Index usage: 99.99% on primary tables
+
+✅ **Historical Data Integration**
+- 92,771 events loaded (1977-2025, 48 years with gaps)
+- Staging table infrastructure for safe ETL operations
+- Load tracking system prevents duplicate loads
+- Production-grade deduplication logic
+
+✅ **Performance Benchmarks**
+- 20 comprehensive benchmark queries across 8 categories
+- Query latency: p50 ~2ms, p95 ~13ms, p99 ~47ms
+- Buffer cache hit ratio: 98.81% (excellent memory utilization)
+- All queries meet or exceed performance targets
+
+✅ **Production Infrastructure**
+- `setup_database.sh` - Automated one-command setup (285 lines)
+- NO SUDO operations required after initial setup
+- Regular user ownership model
+- Comprehensive data validation framework
+
+See [Sprint 2 Completion Report](SPRINT_2_COMPLETION_REPORT.md) for detailed metrics.
 
 **Repository Topics**: aviation, ntsb, accident-analysis, aviation-safety, data-analysis, python, fish-shell, mdb-database, duckdb, jupyter-notebook
 
@@ -142,15 +173,24 @@ For optimal query performance and advanced analytics:
 git clone https://github.com/doublegate/NTSB-Dataset_Analysis.git
 cd NTSB-Dataset_Analysis
 
-# 2. Setup PostgreSQL database (one command)
+# 2. Setup PostgreSQL database (automated one-command setup)
 ./scripts/setup_database.sh
 
-# 3. Load data
+# 3. Load current data (2008-present)
 source .venv/bin/activate
 python scripts/load_with_staging.py --source datasets/avall.mdb
 
-# 4. Start querying
-psql -d ntsb_aviation -c "SELECT COUNT(*) FROM events;"
+# 4. Load historical data (optional, 1982-2007)
+python scripts/load_with_staging.py --source datasets/Pre2008.mdb
+
+# 5. Optimize queries (create materialized views + indexes)
+psql -d ntsb_aviation -f scripts/optimize_queries.sql
+
+# 6. Run performance benchmarks (optional)
+psql -d ntsb_aviation -f scripts/test_performance.sql
+
+# 7. Start querying (sub-millisecond response times)
+psql -d ntsb_aviation -c "SELECT * FROM mv_yearly_stats ORDER BY year DESC LIMIT 5;"
 ```
 
 See [QUICKSTART_POSTGRESQL.md](QUICKSTART_POSTGRESQL.md) for detailed PostgreSQL setup and usage.
@@ -226,9 +266,10 @@ Comprehensive documentation is available:
 - **[scripts/README.md](scripts/README.md)** - Detailed Fish shell script documentation
 - **[examples/README.md](examples/README.md)** - Python analysis examples guide
 
-### Sprint Reports & Progress
-- **[SPRINT_1_REPORT.md](SPRINT_1_REPORT.md)** - Phase 1 Sprint 1 completion (PostgreSQL migration)
-- **[SPRINT_2_COMPLETION_REPORT.md](SPRINT_2_COMPLETION_REPORT.md)** - Phase 1 Sprint 2 progress (query optimization, historical data)
+### Sprint Reports & Analysis
+- **[SPRINT_1_REPORT.md](SPRINT_1_REPORT.md)** - Phase 1 Sprint 1: PostgreSQL migration (478,631 rows)
+- **[SPRINT_2_COMPLETION_REPORT.md](SPRINT_2_COMPLETION_REPORT.md)** - Phase 1 Sprint 2: Query optimization + historical data (700+ lines)
+- **[docs/PERFORMANCE_BENCHMARKS.md](docs/PERFORMANCE_BENCHMARKS.md)** - Comprehensive performance analysis (450+ lines)
 - **[docs/PRE1982_ANALYSIS.md](docs/PRE1982_ANALYSIS.md)** - PRE1982.MDB schema analysis and integration strategy
 
 ### Reference Documentation
@@ -237,6 +278,75 @@ Comprehensive documentation is available:
   - `codman.pdf` - Aviation coding manual
   - `MDB_Release_Notes.pdf` - Database release notes
   - `eadmspub_legacy.pdf` - Legacy schema for PRE1982.MDB
+
+## Performance Metrics
+
+Sprint 2 query optimization achieved exceptional performance on the PostgreSQL database:
+
+### Query Performance
+- **p50 Latency**: ~2ms (median query response time)
+- **p95 Latency**: ~13ms (95th percentile)
+- **p99 Latency**: ~47ms (99th percentile)
+- **Buffer Cache Hit Ratio**: 98.81% (excellent memory utilization)
+- **Index Usage**: 99.99% on primary tables (events, aircraft)
+
+### Materialized Views (30-114x Speedup)
+- **mv_yearly_stats**: Yearly accident statistics (47 rows, 114x faster)
+- **mv_state_stats**: State-level statistics (57 rows, 89x faster)
+- **mv_aircraft_stats**: Aircraft make/model statistics (971 types, 78x faster)
+- **mv_decade_stats**: Decade-level trends (6 decades, 58x faster)
+- **mv_crew_stats**: Crew certification statistics (10 categories, 42x faster)
+- **mv_finding_stats**: Investigation findings (861 distinct findings, 35x faster)
+
+### Database Optimization
+- **Total Indexes**: 59 (30 base + 29 performance/MV indexes)
+- **Materialized Views**: 6 active views with automated refresh
+- **Data Integrity**: 100% (zero duplicate events, zero orphaned records)
+- **Coordinate Validation**: 100% (all coordinates within valid bounds)
+
+All performance metrics meet or exceed enterprise database standards. See [Performance Benchmarks](docs/PERFORMANCE_BENCHMARKS.md) for detailed analysis and methodology.
+
+## Key Scripts
+
+### Database Setup & Management
+- **`scripts/setup_database.sh`** (285 lines) - Automated one-command database setup
+  - Creates PostgreSQL database with PostGIS extension
+  - Installs schema, staging tables, load tracking
+  - Transfers ownership to current user (NO SUDO after setup)
+- **`scripts/schema.sql`** (468 lines) - Complete PostgreSQL schema definition
+  - 11 core tables with triggers, constraints, indexes
+  - Generated columns (ev_year, ev_month, location_geom)
+- **`scripts/transfer_ownership.sql`** (98 lines) - Ownership transfer automation
+
+### Data Loading & ETL
+- **`scripts/load_with_staging.py`** (597 lines) - Production-grade ETL loader
+  - Staging table pattern for safe data loading
+  - Duplicate detection and deduplication logic
+  - Load tracking prevents accidental re-loads
+  - Handles 15,000-45,000 rows/sec throughput
+- **`scripts/create_staging_tables.sql`** (279 lines) - Staging infrastructure
+  - 11 staging tables in separate schema
+  - Helper functions for row counts and duplicate stats
+- **`scripts/create_load_tracking.sql`** (123 lines) - Load tracking system
+
+### Query Optimization & Performance
+- **`scripts/optimize_queries.sql`** (324 lines) - Query optimization suite
+  - Creates 6 materialized views
+  - Creates 9 additional performance indexes
+  - Analyzes all tables and materialized views
+  - `refresh_all_materialized_views()` function
+- **`scripts/test_performance.sql`** (427 lines) - Performance benchmark suite
+  - 20 comprehensive benchmark queries
+  - Measures latency (p50, p95, p99)
+  - Database health metrics
+
+### Data Validation & Quality
+- **`scripts/validate_data.sql`** (384 lines) - Comprehensive data quality checks
+  - 10 validation categories
+  - Row counts, primary keys, NULL values, data integrity
+  - Foreign key validation, index usage, database size
+
+All scripts are production-ready with error handling and comprehensive documentation.
 
 ## Example Queries
 
@@ -487,6 +597,37 @@ All example scripts have been tested and verified:
 - ✅ Maps 1,389 fatal accidents
 - ✅ Regional analysis: West (9,442), South (8,142), Midwest (4,339)
 - ✅ Uses decimal coordinate columns (dec_latitude/dec_longitude)
+
+## Next Steps (Sprint 3)
+
+**Objective**: Apache Airflow ETL Pipeline for Automated Monthly Updates
+
+### Planned Features
+
+**ETL Automation** (Priority 1)
+- 5 production DAGs for automated data pipeline
+  - `monthly_sync_dag.py` - Automated avall.mdb updates from NTSB
+  - `data_transformation_dag.py` - Data cleaning and normalization
+  - `quality_check_dag.py` - Automated validation suite
+  - `mv_refresh_dag.py` - Materialized view updates
+  - `feature_engineering_dag.py` - ML feature preparation
+
+**Monitoring & Alerting** (Priority 2)
+- Email notifications for pipeline failures
+- Slack integration for status updates
+- Performance dashboard for ETL metrics
+- Automated retry logic and error handling
+- Data quality monitoring with alerts
+
+**Historical Data Integration** (Priority 3)
+- PRE1982.MDB integration (1962-1981 data)
+- Custom ETL for legacy schema transformation
+- Mapping coded fields to modern taxonomy
+- Estimated ~87,000 additional events
+
+**Estimated Timeline**: 4-6 weeks (December 2025 - January 2026)
+
+See [Sprint 3 Implementation Plan](to-dos/SPRINT_3_IMPLEMENTATION_PLAN.md) for detailed task breakdown.
 
 ## Contributing
 

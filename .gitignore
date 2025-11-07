@@ -107,6 +107,9 @@ logs/
 *.log.*
 daily_logs/
 
+# Project Planning (keep tracked)
+# to-dos/ directory is tracked for sprint planning
+
 # Temporary Files
 *.tmp
 *.temp
@@ -114,6 +117,7 @@ tmp/
 temp/
 .tmp/
 .~lock.*
+/tmp/NTSB_Datasets/
 
 # Analysis Outputs
 outputs/
@@ -134,6 +138,11 @@ results/
 *.sqlite-journal
 *.sqlite-wal
 *.sqlite-shm
+
+# PostgreSQL dumps
+*.sql.gz
+*.dump
+*.pgdump
 
 # DuckDB
 *.duckdb
@@ -171,6 +180,13 @@ Cargo.lock
 # Fish Shell
 .fish_history
 fish_variables
+
+# Apache Airflow
+airflow/.env
+airflow/logs/
+airflow/__pycache__/
+airflow/dags/__pycache__/
+airflow/plugins/__pycache__/
 
 # Backup Files
 *.bak
