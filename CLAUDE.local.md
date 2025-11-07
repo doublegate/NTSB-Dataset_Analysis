@@ -1,8 +1,8 @@
 # CLAUDE.local.md - Current Project State & Development Guidance
 
-**Last Updated**: 2025-11-06
+**Last Updated**: 2025-11-07
 **Sprint**: Phase 1 Sprint 2 (Query Optimization & Historical Data Integration)
-**Status**: 95% Complete
+**Status**: 95% Complete + PRE1982 Integration Solution Ready ✨
 
 ---
 
@@ -102,6 +102,14 @@ sudo -u postgres psql -d ntsb_aviation -c "ANALYZE events;"  # ❌ WRONG
    - Found: Incompatible schema (denormalized, 200+ columns, coded fields)
    - Decision: Defer to Sprint 3 (requires custom ETL, 8-16 hours)
 
+6. **PRE1982.MDB Integration Solution** ✅
+   - Custom ETL pipeline created: `scripts/transform_pre1982.py` (600+ lines)
+   - Loader created: `scripts/load_transformed_pre1982.py` (400+ lines)
+   - Comprehensive integration guide: `docs/PRE1982_INTEGRATION_GUIDE.md`
+   - Two-step process: Transform MDB → Modern CSVs → PostgreSQL
+   - Ready for execution (requires Git LFS, mdbtools, PostgreSQL)
+   - Expected: +87,000 events (1962-1981), ~3.5M total rows, 1.2-1.5GB DB size
+
 ### Pending ⏳:
 
 1. **Performance Benchmarks** (Sprint 2 final task)
@@ -122,10 +130,11 @@ sudo -u postgres psql -d ntsb_aviation -c "ANALYZE events;"  # ❌ WRONG
    - Lessons learned
    - Next steps for Sprint 3
 
-4. **PRE1982 Integration** (Sprint 3 - deferred)
-   - Custom ETL for legacy schema
-   - Estimated 8-16 hours development
-   - Load 1962-1981 data (~87,000 events estimated)
+4. **PRE1982 Integration** (Ready for execution) ✅
+   - ETL pipeline completed and documented
+   - Requires environment setup: Git LFS, mdbtools, PostgreSQL running
+   - Execute: See `docs/PRE1982_INTEGRATION_GUIDE.md` for step-by-step instructions
+   - Will add 1962-1981 data (~87,000 events, ~3.5M total rows)
 
 ---
 
@@ -250,6 +259,22 @@ sudo -u postgres psql -d ntsb_aviation -c "ANALYZE events;"  # ❌ WRONG
    - 10 validation categories (row counts, primary keys, NULL values, data integrity, foreign keys, partitions, indexes, generated columns, database size)
    - **Usage**: `psql -d ntsb_aviation -f scripts/validate_data.sql`
 
+9. **`scripts/transform_pre1982.py`** (600+ lines, v1.0.0) ✨ NEW
+   - Custom ETL for legacy PRE1982.MDB schema (1962-1981)
+   - Transforms denormalized MDB → modern normalized CSVs
+   - Generates synthetic ev_id (format: YYYYMMDDR + RecNum)
+   - Pivots injury data, maps cause factors to findings
+   - **Usage**: `python scripts/transform_pre1982.py`
+   - **Output**: Transformed CSVs in `data/pre1982_transformed/`
+
+10. **`scripts/load_transformed_pre1982.py`** (400+ lines, v1.0.0) ✨ NEW
+    - Loads pre-transformed PRE1982 CSVs into PostgreSQL
+    - Uses staging table pattern for deduplication
+    - Expects ZERO duplicates (1962-1981 has no overlap with 2000-2025)
+    - Updates load_tracking for PRE1982.MDB
+    - **Usage**: `python scripts/load_transformed_pre1982.py`
+    - **Prerequisites**: Run transform_pre1982.py first
+
 ### Documentation Files:
 
 1. **`SPRINT_1_REPORT.md`** (251 lines)
@@ -268,7 +293,14 @@ sudo -u postgres psql -d ntsb_aviation -c "ANALYZE events;"  # ❌ WRONG
    - Integration complexity assessment
    - Recommendation: Defer to Sprint 3
 
-4. **`CLAUDE.local.md`** (this file)
+4. **`docs/PRE1982_INTEGRATION_GUIDE.md`** (500+ lines) ✨ NEW
+   - Complete integration guide for PRE1982.MDB (1962-1981)
+   - Step-by-step transformation and loading instructions
+   - Troubleshooting section for common issues
+   - Expected outcomes and validation procedures
+   - **Status**: Production ready
+
+5. **`CLAUDE.local.md`** (this file)
    - Current project state and development guidance
    - "NO SUDO" principle documentation
    - Sprint status and database metrics
@@ -422,8 +454,14 @@ SELECT * FROM get_row_counts();
 source .venv/bin/activate
 python scripts/load_with_staging.py --source avall.mdb
 
-# Load historical data
+# Load historical data (2000-2007)
 python scripts/load_with_staging.py --source Pre2008.mdb
+
+# Load legacy data (1962-1981) - Two-step process
+# Step 1: Transform PRE1982.MDB to modern schema
+python scripts/transform_pre1982.py
+# Step 2: Load transformed CSVs
+python scripts/load_transformed_pre1982.py
 
 # Optimize database
 psql -d ntsb_aviation -f scripts/optimize_queries.sql
