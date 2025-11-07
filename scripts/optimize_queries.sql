@@ -119,7 +119,7 @@ GROUP BY acft_make, acft_model
 HAVING COUNT(DISTINCT a.ev_id) >= 5  -- Only aircraft with 5+ accidents
 ORDER BY accident_count DESC;
 
-CREATE INDEX idx_mv_aircraft_stats_make_model ON mv_aircraft_stats(acft_make, acft_model);
+CREATE UNIQUE INDEX idx_mv_aircraft_stats_make_model ON mv_aircraft_stats(acft_make, acft_model);
 CREATE INDEX idx_mv_aircraft_stats_count ON mv_aircraft_stats(accident_count DESC);
 
 \echo '  ✓ mv_aircraft_stats created'
@@ -164,7 +164,7 @@ WHERE crew_category IS NOT NULL
 GROUP BY crew_category
 ORDER BY crew_count DESC;
 
-CREATE INDEX idx_mv_crew_stats_category ON mv_crew_stats(crew_category);
+CREATE UNIQUE INDEX idx_mv_crew_stats_category ON mv_crew_stats(crew_category);
 
 \echo '  ✓ mv_crew_stats created'
 
@@ -186,7 +186,7 @@ GROUP BY finding_code, finding_description
 HAVING COUNT(*) >= 10  -- Only findings with 10+ occurrences
 ORDER BY occurrence_count DESC;
 
-CREATE INDEX idx_mv_finding_stats_code ON mv_finding_stats(finding_code);
+CREATE UNIQUE INDEX idx_mv_finding_stats_code ON mv_finding_stats(finding_code, finding_description);
 CREATE INDEX idx_mv_finding_stats_count ON mv_finding_stats(occurrence_count DESC);
 
 \echo '  ✓ mv_finding_stats created'

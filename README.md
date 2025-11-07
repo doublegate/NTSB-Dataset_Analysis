@@ -226,6 +226,46 @@ jupyter lab
 # Open examples/starter_notebook.ipynb
 ```
 
+### Option C: Airflow ETL Pipeline (Automated Monthly Updates)
+
+**Status**: Sprint 3 Week 1 Complete (⚠️ requires PostgreSQL network configuration)
+
+For automated ETL workflows with scheduling and monitoring:
+
+```bash
+# 1. Prerequisites: Setup PostgreSQL database first (Option A)
+./scripts/setup_database.sh
+
+# 2. Configure PostgreSQL for Docker access (ONE-TIME SETUP)
+# See docs/AIRFLOW_SETUP_GUIDE.md for detailed instructions
+# TL;DR: Edit postgresql.conf to set listen_addresses = '*'
+#        Add pg_hba.conf entry for Docker bridge (172.17.0.0/16)
+#        Restart PostgreSQL
+
+# 3. Start Airflow services
+cd airflow/
+docker compose up -d
+
+# 4. Access Web UI
+open http://localhost:8080  # Login: airflow/airflow
+
+# 5. Trigger hello_world DAG (tutorial)
+docker compose exec airflow-scheduler airflow dags trigger hello_world
+
+# 6. Stop services
+docker compose down
+```
+
+**Available DAGs**:
+- `hello_world` - Tutorial DAG (demonstrates Bash, Python, SQL operators)
+
+**Coming in Week 2**:
+- `monthly_sync_dag` - Automated NTSB data updates
+- Email/Slack notifications for failures
+- Automated materialized view refreshes
+
+See [Airflow Setup Guide](docs/AIRFLOW_SETUP_GUIDE.md) for detailed documentation.
+
 ## Installation
 
 ### Prerequisites
@@ -269,8 +309,14 @@ Comprehensive documentation is available:
 ### Sprint Reports & Analysis
 - **[SPRINT_1_REPORT.md](SPRINT_1_REPORT.md)** - Phase 1 Sprint 1: PostgreSQL migration (478,631 rows)
 - **[SPRINT_2_COMPLETION_REPORT.md](SPRINT_2_COMPLETION_REPORT.md)** - Phase 1 Sprint 2: Query optimization + historical data (700+ lines)
+- **[docs/SPRINT_3_WEEK_1_COMPLETION_REPORT.md](docs/SPRINT_3_WEEK_1_COMPLETION_REPORT.md)** - Sprint 3 Week 1: Airflow infrastructure setup
 - **[docs/PERFORMANCE_BENCHMARKS.md](docs/PERFORMANCE_BENCHMARKS.md)** - Comprehensive performance analysis (450+ lines)
 - **[docs/PRE1982_ANALYSIS.md](docs/PRE1982_ANALYSIS.md)** - PRE1982.MDB schema analysis and integration strategy
+
+### Airflow ETL Pipeline
+- **[docs/AIRFLOW_SETUP_GUIDE.md](docs/AIRFLOW_SETUP_GUIDE.md)** - Complete Airflow setup and usage guide (874 lines)
+- **[airflow/docker-compose.yml](airflow/docker-compose.yml)** - Docker Compose configuration for Airflow
+- **[airflow/dags/](airflow/dags/)** - Airflow DAG definitions
 
 ### Reference Documentation
 - **ref_docs/** - Official NTSB schema documentation and coding manuals

@@ -7,14 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+#### Apache Airflow Infrastructure (Sprint 3 Week 1 - 2025-11-06)
+- **Docker Compose Setup** (`airflow/docker-compose.yml`, 196 lines)
+  - 3 services: postgres-airflow (metadata), webserver (UI), scheduler
+  - LocalExecutor configuration (no Celery/Redis needed)
+  - Health checks for all services
+  - Volume mounts for dags/, logs/, plugins/, config/
+  - Automated initialization with airflow-init service
+
+- **Environment Configuration** (`airflow/.env`, 32 lines, gitignored)
+  - Airflow UID for file permissions
+  - Web UI credentials (airflow/airflow default)
+  - NTSB database connection parameters
+  - PostgreSQL host: Docker bridge IP (172.17.0.1)
+
+- **Hello-World DAG** (`airflow/dags/hello_world_dag.py`, 173 lines)
+  - 5 tasks demonstrating Bash, Python, PostgreSQL operators
+  - Database connectivity verification
+  - Tutorial for Airflow concepts
+  - Manual trigger only (schedule_interval=None)
+
+- **Airflow Setup Guide** (`docs/AIRFLOW_SETUP_GUIDE.md`, 874 lines)
+  - Complete installation instructions
+  - PostgreSQL network configuration guide
+  - Usage and development workflow
+  - Troubleshooting guide (6 common issues)
+  - CLI command reference
+
+- **Sprint 3 Week 1 Completion Report** (`docs/SPRINT_3_WEEK_1_COMPLETION_REPORT.md`)
+  - Comprehensive deliverables documentation
+  - Testing results and performance metrics
+  - Known issues and solutions
+  - Next steps for Week 2
+
+### Changed
+- **README.md**: Added Airflow ETL Pipeline section with Quick Start
+- **CLAUDE.local.md**: Updated with Sprint 3 Week 1 status and known issues
+- **.gitignore**: Already included Airflow patterns (airflow/.env, logs/, __pycache__)
+
+### Known Issues
+- **PostgreSQL Network Configuration Required**: PostgreSQL on host must accept connections from Docker containers (172.17.0.1)
+  - Solution documented in AIRFLOW_SETUP_GUIDE.md
+  - Blocks production DAG development (Week 2)
+- Scheduler shows "unhealthy" status (healthcheck timing, cosmetic only)
+- Docker Compose `version` deprecation warning (cleanup task)
+
 ### Planned
-- Complete Phase 1 Sprint 2 (performance benchmarks, final documentation)
-- Begin Phase 1 Sprint 3 (Apache Airflow ETL pipeline for automated monthly updates)
+- **Sprint 3 Week 2**: First production DAG (`monthly_sync_dag.py` for automated NTSB updates)
+- **Sprint 3 Week 3-4**: Additional production DAGs (quality checks, MV refresh, feature engineering)
 - PRE1982.MDB integration with custom ETL for legacy schema
+- Email/Slack notifications for DAG failures
 - Complete remaining phase enhancements (Phase 3-5 to 60-80KB each)
 - Establish research partnerships and grant applications
 - GitHub Actions CI/CD pipeline for automated testing
-- Docker container support for cross-platform compatibility
 
 ## [1.2.0] - 2025-11-06
 
