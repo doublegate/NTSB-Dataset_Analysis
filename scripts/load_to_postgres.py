@@ -89,7 +89,12 @@ class PostgreSQLLoader:
         "engines": ["eng_hp_or_lbs"],
     }
 
-    def __init__(self, data_dir: str = "data", db_name: str = "ntsb_aviation", db_user: str = None):
+    def __init__(
+        self,
+        data_dir: str = "data",
+        db_name: str = "ntsb_aviation",
+        db_user: str = None,
+    ):
         self.data_dir = Path(data_dir)
         self.db_name = db_name
         self.db_user = db_user or os.getenv("USER")
@@ -148,6 +153,7 @@ class PostgreSQLLoader:
 
             # Convert ev_time from numeric (HHMM format) to TIME
             if "ev_time" in df.columns:
+
                 def convert_time(val):
                     """Convert numeric HHMM format to TIME string"""
                     if pd.isna(val):
@@ -172,10 +178,14 @@ class PostgreSQLLoader:
                 # Convert invalid ages (< 10 or > 120) to NULL
                 # Ages 1-9 are impossible for pilots/crew
                 # Ages > 120 exceed maximum verified human lifespan (oldest pilot flew at 105)
-                invalid_mask = (df["crew_age"].notna()) & ((df["crew_age"] < 10) | (df["crew_age"] > 120))
+                invalid_mask = (df["crew_age"].notna()) & (
+                    (df["crew_age"] < 10) | (df["crew_age"] > 120)
+                )
                 invalid_count = invalid_mask.sum()
                 if invalid_count > 0:
-                    logger.warning(f"Converting {invalid_count} invalid crew ages (< 10 or > 120) to NULL")
+                    logger.warning(
+                        f"Converting {invalid_count} invalid crew ages (< 10 or > 120) to NULL"
+                    )
                 df.loc[invalid_mask, "crew_age"] = None
 
         # Replace empty strings with None
@@ -209,7 +219,9 @@ class PostgreSQLLoader:
                     ORDER BY ordinal_position
                 """
                     ),
-                    {"table_name": table.lower()},  # PostgreSQL stores table names in lowercase
+                    {
+                        "table_name": table.lower()
+                    },  # PostgreSQL stores table names in lowercase
                 )
                 columns = [row[0] for row in result.fetchall()]
                 return columns
@@ -225,7 +237,18 @@ class PostgreSQLLoader:
             return df
 
         # Remove columns not in schema (exclude auto-generated columns)
-        auto_columns = ["id", "crew_no", "eng_no", "created_at", "updated_at", "content_hash", "ev_year", "ev_month", "location_geom", "search_vector"]
+        auto_columns = [
+            "id",
+            "crew_no",
+            "eng_no",
+            "created_at",
+            "updated_at",
+            "content_hash",
+            "ev_year",
+            "ev_month",
+            "location_geom",
+            "search_vector",
+        ]
         db_columns_input = [col for col in db_columns if col not in auto_columns]
 
         # Keep only columns that exist in database
@@ -256,22 +279,22 @@ class PostgreSQLLoader:
             total_rows = len(df)
 
             if total_rows == 0:
-                logger.warning(f"  Empty CSV file, skipping...")
+                logger.warning("  Empty CSV file, skipping...")
                 return {"status": "skipped", "reason": "empty"}
 
             logger.info(f"  Rows: {total_rows:,}")
             logger.info(f"  Columns: {len(df.columns)}")
 
             # Clean and transform
-            logger.info(f"  Cleaning data...")
+            logger.info("  Cleaning data...")
             df = self.clean_dataframe(df, table)
 
             # Align to schema
-            logger.info(f"  Aligning to PostgreSQL schema...")
+            logger.info("  Aligning to PostgreSQL schema...")
             df = self.align_dataframe_to_schema(df, table)
 
             # Load to PostgreSQL
-            logger.info(f"  Loading to PostgreSQL...")
+            logger.info("  Loading to PostgreSQL...")
             logger.info(f"  DataFrame shape before insert: {df.shape}")
             logger.info(f"  DataFrame columns: {list(df.columns)}")
             if len(df) > 0:
@@ -293,7 +316,7 @@ class PostgreSQLLoader:
             duration = (datetime.now() - start_time).total_seconds()
             rows_per_sec = total_rows / duration if duration > 0 else 0
 
-            logger.info(f"  ✓ Success!")
+            logger.info("  ✓ Success!")
             logger.info(f"  Duration: {duration:.1f}s ({rows_per_sec:.0f} rows/sec)")
 
             return {

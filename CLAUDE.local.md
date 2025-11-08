@@ -61,6 +61,62 @@ sudo -u postgres psql -d ntsb_aviation -c "ANALYZE events;"  # ❌ WRONG
 
 ---
 
+## Database Maintenance Session (2025-11-07 23:53)
+
+**Task**: Comprehensive database grooming and optimization
+**Duration**: 8 seconds (maintenance script execution)
+**Database State Before**: 801 MB, 179,809 events, ~1.3M rows
+**Database State After**: 801 MB, 179,809 events, ~1.3M rows (no bloat detected)
+
+**Actions Taken**:
+- ✅ Validated all data (0 event duplicates, 0 orphans, 100% FK integrity)
+- ✅ VACUUM ANALYZE (0 dead tuples removed - already clean)
+- ✅ Refreshed all 6 materialized views (1.3s total)
+- ✅ Analyzed index usage (17 unused indexes identified, all retained)
+- ✅ Updated table statistics for query planner
+- ✅ Checked performance metrics (96.48% cache hit ratio, 99.98%+ index usage)
+
+**Results**:
+- Database size: 801 MB → 801 MB (0% change, no bloat)
+- Dead tuples: 0 (0.00% bloat across all tables)
+- Data quality: ✅ 100% (all checks passed)
+- Performance: ✅ EXCELLENT (96.48% cache hit, 99.98% index usage)
+- Narrative duplicates: 531 events (by design for multi-aircraft accidents, not a bug)
+
+**Created Scripts**:
+- `scripts/maintain_database.sql` (455 lines, comprehensive 10-phase maintenance)
+- `scripts/maintain_database.sh` (60 lines, wrapper with logging)
+- Maintenance log: `logs/maintenance/maintenance_20251107_235315.log`
+
+**Database Health Score**: 98/100 🏆
+- Data Integrity: 100/100 (0 duplicates, 0 orphans)
+- Storage Efficiency: 100/100 (0% bloat)
+- Query Performance: 95/100 (excellent cache/index metrics)
+- Index Health: 90/100 (17 unused but retained for flexibility)
+
+**Index Analysis**:
+- Total indexes: 59
+- Unused indexes: 17 (62 MB, 30% of index size)
+- **Recommendation**: RETAIN all unused indexes
+  - Full-text search: `idx_narratives_search` (44 MB) for narrative queries
+  - User queries: State, NTSB number, registration, damage, fatality filters
+  - Low overhead: 62 MB is <8% of database size
+  - Production usage: Unused in validation ≠ unused in production
+
+**Recommendations**:
+- ✅ Run maintain_database.sh monthly after data loads
+- ✅ Monitor cache hit ratio (target: >90%, current: 96.48%)
+- ✅ Check for orphaned records monthly (current: 0)
+- ✅ Review index usage after 6 months production data
+- ❌ DO NOT drop unused indexes without 6+ months production confirmation
+
+**Files Created**:
+- `/home/parobek/tmp/NTSB_Datasets/DATABASE_MAINTENANCE_REPORT.md` (comprehensive 450+ line report)
+- `scripts/maintain_database.sql` (production-ready maintenance script)
+- `scripts/maintain_database.sh` (automated wrapper with logging)
+
+---
+
 ## Current Sprint Status: Phase 1 Sprint 3 Week 3
 
 **Objective**: Monitoring & Observability Infrastructure

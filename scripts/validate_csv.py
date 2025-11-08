@@ -11,7 +11,6 @@ Usage:
     python scripts/validate_csv.py --data-dir data/
 """
 
-import os
 import sys
 import argparse
 from pathlib import Path
@@ -94,7 +93,9 @@ class CSVValidator:
                     "rows": row_count,
                     "columns": col_count,
                     "null_pct": round(null_pct, 2),
-                    "memory_mb": round(df.memory_usage(deep=True).sum() / (1024 * 1024), 2),
+                    "memory_mb": round(
+                        df.memory_usage(deep=True).sum() / (1024 * 1024), 2
+                    ),
                     "columns_list": list(df.columns),
                 }
 
@@ -176,11 +177,15 @@ class CSVValidator:
                 (df["dec_latitude"].between(-90, 90))
                 & (df["dec_longitude"].between(-180, 180))
             ).sum()
-            total_coords = df[["dec_latitude", "dec_longitude"]].notna().all(axis=1).sum()
+            total_coords = (
+                df[["dec_latitude", "dec_longitude"]].notna().all(axis=1).sum()
+            )
             results["coordinates"] = {
                 "valid": int(valid_coords),
                 "total": int(total_coords),
-                "pct": round((valid_coords / total_coords * 100) if total_coords > 0 else 0, 2),
+                "pct": round(
+                    (valid_coords / total_coords * 100) if total_coords > 0 else 0, 2
+                ),
             }
             print(
                 f"  Valid coordinates: {valid_coords:,} / {total_coords:,} "
@@ -191,7 +196,7 @@ class CSVValidator:
         if "ev_highest_injury" in df.columns:
             injury_dist = df["ev_highest_injury"].value_counts().to_dict()
             results["injury_distribution"] = injury_dist
-            print(f"  Injury severity distribution:")
+            print("  Injury severity distribution:")
             for level, count in injury_dist.items():
                 print(f"    {level}: {count:,}")
 
@@ -267,13 +272,9 @@ class CSVValidator:
 
         total_files = len(self.tables)
         files_found = sum(
-            1
-            for r in all_results["file_existence"].values()
-            if r.get("exists", False)
+            1 for r in all_results["file_existence"].values() if r.get("exists", False)
         )
-        total_rows = sum(
-            r.get("rows", 0) for r in all_results["data_quality"].values()
-        )
+        total_rows = sum(r.get("rows", 0) for r in all_results["data_quality"].values())
         total_size_mb = sum(
             r.get("size_mb", 0) for r in all_results["file_existence"].values()
         )
@@ -291,9 +292,7 @@ class CSVValidator:
                 quality_score = 100 - null_pct
                 quality_scores.append(quality_score)
 
-        avg_quality = (
-            sum(quality_scores) / len(quality_scores) if quality_scores else 0
-        )
+        avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0
         print(f"Average data quality: {avg_quality:.1f}% (100% - avg null%)")
         print()
 
@@ -318,7 +317,9 @@ class CSVValidator:
         print()
 
         # Ready for PostgreSQL?
-        if files_found >= 9 and avg_quality >= 80:  # At least 9 key tables, 80%+ quality
+        if (
+            files_found >= 9 and avg_quality >= 80
+        ):  # At least 9 key tables, 80%+ quality
             print("✓ Data quality sufficient for PostgreSQL migration")
             return "READY"
         else:
@@ -327,7 +328,7 @@ class CSVValidator:
 
     def run_validation(self) -> dict:
         """Run all validation steps"""
-        print(f"\n📊 CSV Validation Report")
+        print("\n📊 CSV Validation Report")
         print(f"Data directory: {self.data_dir.absolute()}")
         print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print()

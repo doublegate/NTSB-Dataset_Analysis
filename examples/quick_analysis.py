@@ -6,6 +6,7 @@ import duckdb
 from pathlib import Path
 import sys
 
+
 # Example: Query events from CSV using DuckDB
 def analyze_recent_events(year=2023):
     """
@@ -49,6 +50,7 @@ def analyze_recent_events(year=2023):
         print(f"❌ Error querying database: {e}")
         raise
 
+
 # Example: Read with pandas
 def load_events(low_memory=True):
     """
@@ -61,25 +63,30 @@ def load_events(low_memory=True):
         DataFrame of all events
     """
     try:
-        df = pd.read_csv('data/avall-events.csv', low_memory=low_memory)
+        df = pd.read_csv("data/avall-events.csv", low_memory=low_memory)
         print(f"📊 Loaded {len(df):,} events from database")
         return df
     except FileNotFoundError:
         print("❌ Error: data/avall-events.csv not found")
-        print("   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb")
+        print(
+            "   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb"
+        )
         raise
     except Exception as e:
         print(f"❌ Error loading data: {e}")
         raise
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     print("📊 NTSB Aviation Accident Database - Quick Analysis")
     print("=" * 60)
 
     # Check if data exists
-    if not Path('data/avall-events.csv').exists():
+    if not Path("data/avall-events.csv").exists():
         print("\n❌ Error: data/avall-events.csv not found")
-        print("   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb")
+        print(
+            "   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb"
+        )
         sys.exit(1)
 
     try:
@@ -92,7 +99,7 @@ if __name__ == '__main__':
             print(df.head())
 
             # Basic statistics
-            print(f"\nStatistics:")
+            print("\nStatistics:")
             print(f"  Total fatalities: {df['fatalities'].sum():.0f}")
             print(f"  Total serious injuries: {df['serious_injuries'].sum():.0f}")
             print(f"  Fatal accidents: {(df['fatalities'] > 0).sum()}")

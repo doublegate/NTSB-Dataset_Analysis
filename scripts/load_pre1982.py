@@ -610,7 +610,7 @@ class PRE1982Loader:
                   AND column_default IS NULL  -- Only include columns with no default value
                 ORDER BY ordinal_position
                 """,
-                (table_name,)
+                (table_name,),
             )
             return [row[0] for row in cur.fetchall()]
 
@@ -649,18 +649,27 @@ class PRE1982Loader:
         """
         # First pass: use QUOTE_ALL to ensure all strings are quoted
         temp_buffer = StringIO()
-        df.to_csv(temp_buffer, index=False, header=False, na_rep="\\N", quoting=csv.QUOTE_ALL, doublequote=True)
+        df.to_csv(
+            temp_buffer,
+            index=False,
+            header=False,
+            na_rep="\\N",
+            quoting=csv.QUOTE_ALL,
+            doublequote=True,
+        )
 
         # Second pass: un-quote all \\N markers
         csv_content = temp_buffer.getvalue()
         # Replace "\\N" (quoted null) with \\N (unquoted null)
-        csv_content = csv_content.replace('"\\N"', '\\N')
+        csv_content = csv_content.replace('"\\N"', "\\N")
 
         # Write to output buffer
         buffer.write(csv_content)
         buffer.seek(0)
 
-    def _convert_integer_columns(self, df: pd.DataFrame, table_name: str) -> pd.DataFrame:
+    def _convert_integer_columns(
+        self, df: pd.DataFrame, table_name: str
+    ) -> pd.DataFrame:
         """
         Convert float64 columns to Int64 (nullable integer) for PostgreSQL INTEGER columns.
 
@@ -675,8 +684,17 @@ class PRE1982Loader:
         """
         # Define INTEGER columns for each table (from schema.sql)
         INTEGER_COLUMNS = {
-            "events": ["ev_year", "ev_month", "inj_tot_f", "inj_tot_s", "inj_tot_m", "inj_tot_n",
-                       "wx_temp", "wx_wind_dir", "wx_wind_speed"],
+            "events": [
+                "ev_year",
+                "ev_month",
+                "inj_tot_f",
+                "inj_tot_s",
+                "inj_tot_m",
+                "inj_tot_n",
+                "wx_temp",
+                "wx_wind_dir",
+                "wx_wind_speed",
+            ],
             "aircraft": ["num_eng"],
             "flight_crew": ["crew_age", "pilot_tot_time", "pilot_make_time"],
             "injury": ["inj_person_count"],
@@ -695,7 +713,7 @@ class PRE1982Loader:
                 # Use Int64 (capital I) - nullable integer dtype
                 # This prevents "0.0" and handles NaN → NULL correctly
                 # ALWAYS use pd.to_numeric first to handle malformed data like "1 0042"
-                df[col] = pd.to_numeric(df[col], errors='coerce').astype('Int64')
+                df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
 
         return df
 
@@ -715,26 +733,68 @@ class PRE1982Loader:
 
         # DEBUG: Check columns BEFORE filtering
         if table_name == "events":
-            logger.info(f"DEBUG - BEFORE filter - DataFrame columns ({len(df.columns)}): {list(df.columns)[:30]}")
-            if 'wx_wind_speed' in df.columns:
-                sample = df['wx_wind_speed'].dropna().head(1)
+            logger.info(
+                f"DEBUG - BEFORE filter - DataFrame columns ({len(df.columns)}): {list(df.columns)[:30]}"
+            )
+            if "wx_wind_speed" in df.columns:
+                sample = df["wx_wind_speed"].dropna().head(1)
                 if len(sample) > 0:
-                    logger.info(f"DEBUG - BEFORE filter - wx_wind_speed sample: {repr(sample.iloc[0])}")
+                    logger.info(
+                        f"DEBUG - BEFORE filter - wx_wind_speed sample: {repr(sample.iloc[0])}"
+                    )
 
         # Filter to only expected columns (drop any extras from raw MDB data)
         # NOTE: Weather/flight columns excluded for PRE1982 - malformed data in MDB
         expected_cols_by_table = {
             "events": [
-                "ev_id", "ev_date", "ev_time", "ev_year", "ev_month", "ev_city",
-                "ev_state", "ev_country", "ntsb_no", "dec_latitude", "dec_longitude",
-                "inj_tot_f", "inj_tot_s", "inj_tot_m", "inj_tot_n"
+                "ev_id",
+                "ev_date",
+                "ev_time",
+                "ev_year",
+                "ev_month",
+                "ev_city",
+                "ev_state",
+                "ev_country",
+                "ntsb_no",
+                "dec_latitude",
+                "dec_longitude",
+                "inj_tot_f",
+                "inj_tot_s",
+                "inj_tot_m",
+                "inj_tot_n",
                 # wx_cond_basic, wx_temp, wx_wind_dir, wx_wind_speed, wx_vis - EXCLUDED (malformed in PRE1982)
                 # flight_plan_filed, flight_activity, flight_phase - EXCLUDED (not in PRE1982)
             ],
-            "aircraft": ["ev_id", "aircraft_key", "acft_make", "acft_model", "damage", "num_eng"],
-            "flight_crew": ["ev_id", "aircraft_key", "crew_category", "crew_age", "pilot_tot_time", "pilot_make_time"],
-            "injury": ["ev_id", "aircraft_key", "inj_person_category", "inj_level", "inj_person_count"],
-            "findings": ["ev_id", "aircraft_key", "finding_description", "cm_inPC", "cause_factor"],
+            "aircraft": [
+                "ev_id",
+                "aircraft_key",
+                "acft_make",
+                "acft_model",
+                "damage",
+                "num_eng",
+            ],
+            "flight_crew": [
+                "ev_id",
+                "aircraft_key",
+                "crew_category",
+                "crew_age",
+                "pilot_tot_time",
+                "pilot_make_time",
+            ],
+            "injury": [
+                "ev_id",
+                "aircraft_key",
+                "inj_person_category",
+                "inj_level",
+                "inj_person_count",
+            ],
+            "findings": [
+                "ev_id",
+                "aircraft_key",
+                "finding_description",
+                "cm_inPC",
+                "cause_factor",
+            ],
             "narratives": ["ev_id", "aircraft_key", "narr_accp", "narr_cause"],
         }
 
@@ -742,13 +802,19 @@ class PRE1982Loader:
             expected_cols = expected_cols_by_table[table_name]
             # Only keep columns that exist in both DataFrame and expected list
             cols_to_keep = [col for col in expected_cols if col in df.columns]
-            df = df[cols_to_keep].copy()  # CRITICAL: Use .copy() to prevent pandas from keeping references to filtered columns
+            df = df[
+                cols_to_keep
+            ].copy()  # CRITICAL: Use .copy() to prevent pandas from keeping references to filtered columns
 
             # DEBUG: Check columns AFTER filtering
             if table_name == "events":
-                logger.info(f"DEBUG - AFTER filter - DataFrame columns ({len(df.columns)}): {list(df.columns)}")
-                if 'wx_wind_speed' in df.columns:
-                    logger.info(f"DEBUG - AFTER filter - wx_wind_speed still in DataFrame!")
+                logger.info(
+                    f"DEBUG - AFTER filter - DataFrame columns ({len(df.columns)}): {list(df.columns)}"
+                )
+                if "wx_wind_speed" in df.columns:
+                    logger.info(
+                        "DEBUG - AFTER filter - wx_wind_speed still in DataFrame!"
+                    )
 
         # Clear staging table
         with self.conn.cursor() as cur:
@@ -765,16 +831,22 @@ class PRE1982Loader:
         if table_name == "events":
             null_only_cols = [col for col in df.columns if df[col].isna().all()]
             if null_only_cols:
-                logger.info(f"DEBUG - Dropping {len(null_only_cols)} all-NULL columns: {null_only_cols}")
+                logger.info(
+                    f"DEBUG - Dropping {len(null_only_cols)} all-NULL columns: {null_only_cols}"
+                )
                 df = df.drop(columns=null_only_cols)
 
         # Debug after reorder
         if table_name == "events":
-            logger.info(f"DEBUG - AFTER reorder - DataFrame columns ({len(df.columns)}): {list(df.columns)}")
-            if 'wx_wind_speed' in df.columns:
-                sample = df['wx_wind_speed'].dropna().head(1)
+            logger.info(
+                f"DEBUG - AFTER reorder - DataFrame columns ({len(df.columns)}): {list(df.columns)}"
+            )
+            if "wx_wind_speed" in df.columns:
+                sample = df["wx_wind_speed"].dropna().head(1)
                 if len(sample) > 0:
-                    logger.info(f"DEBUG - AFTER reorder - wx_wind_speed sample: {repr(sample.iloc[0])}")
+                    logger.info(
+                        f"DEBUG - AFTER reorder - wx_wind_speed sample: {repr(sample.iloc[0])}"
+                    )
 
         # Convert INTEGER columns to prevent "0.0" errors
         df = self._convert_integer_columns(df, table_name)
@@ -787,11 +859,15 @@ class PRE1982Loader:
                     # Check first non-null value
                     sample = df[col].dropna().head(1)
                     if len(sample) > 0:
-                        logger.info(f"DEBUG - {col} sample value: {repr(sample.iloc[0])} (type: {type(sample.iloc[0])})")
+                        logger.info(
+                            f"DEBUG - {col} sample value: {repr(sample.iloc[0])} (type: {type(sample.iloc[0])})"
+                        )
 
         # DEBUG: Check DataFrame shape before CSV conversion
         if table_name == "events":
-            logger.info(f"DEBUG - DataFrame shape before to_csv: {df.shape} (rows, cols)")
+            logger.info(
+                f"DEBUG - DataFrame shape before to_csv: {df.shape} (rows, cols)"
+            )
             logger.info(f"DEBUG - DataFrame index type: {type(df.index)}")
             logger.info(f"DEBUG - DataFrame index name: {df.index.name}")
 
@@ -802,8 +878,10 @@ class PRE1982Loader:
         # Debug: Print first line of CSV if events
         if table_name == "events":
             csv_content = buffer.getvalue()
-            first_line = csv_content.split('\n')[0]
-            logger.info(f"DEBUG - First CSV line length: {len(first_line.split(','))} columns")
+            first_line = csv_content.split("\n")[0]
+            logger.info(
+                f"DEBUG - First CSV line length: {len(first_line.split(','))} columns"
+            )
             logger.info(f"DEBUG - First CSV line (first 500 chars): {first_line[:500]}")
             buffer.seek(0)  # Reset after reading
 
@@ -832,7 +910,7 @@ class PRE1982Loader:
                   AND is_generated = 'NEVER'
                 ORDER BY ordinal_position
                 """,
-                (table_name,)
+                (table_name,),
             )
             return [row[0] for row in cur.fetchall()]
 
@@ -953,8 +1031,10 @@ class PRE1982Loader:
                 event = self.transform_events(row)
 
                 # Skip events with NULL ev_date (violates NOT NULL constraint)
-                if event['ev_date'] is None:
-                    logger.warning(f"Skipping RecNum {row['RecNum']} due to NULL ev_date")
+                if event["ev_date"] is None:
+                    logger.warning(
+                        f"Skipping RecNum {row['RecNum']} due to NULL ev_date"
+                    )
                     continue
 
                 events_rows.append(event)

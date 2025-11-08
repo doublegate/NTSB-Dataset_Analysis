@@ -111,7 +111,10 @@ class HistoricalDataLoader:
     }
 
     def __init__(
-        self, data_dir: str = "data/pre2008", db_name: str = "ntsb_aviation", db_user: str = None
+        self,
+        data_dir: str = "data/pre2008",
+        db_name: str = "ntsb_aviation",
+        db_user: str = None,
     ):
         self.data_dir = Path(data_dir)
         self.db_name = db_name
@@ -232,10 +235,16 @@ class HistoricalDataLoader:
             if "ev_date" in df.columns:
                 current_year = datetime.now().year
                 # Set invalid dates to None
-                invalid_dates = (df["ev_date"].isna()) | (df["ev_date"].dt.year < 1962) | (df["ev_date"].dt.year > current_year + 1)
+                invalid_dates = (
+                    (df["ev_date"].isna())
+                    | (df["ev_date"].dt.year < 1962)
+                    | (df["ev_date"].dt.year > current_year + 1)
+                )
                 invalid_count = invalid_dates.sum()
                 if invalid_count > 0:
-                    logger.warning(f"Found {invalid_count} rows with NULL or invalid ev_date - removing these rows")
+                    logger.warning(
+                        f"Found {invalid_count} rows with NULL or invalid ev_date - removing these rows"
+                    )
                     df = df[~invalid_dates]
 
         # Clean Flight_Crew age data
@@ -258,7 +267,14 @@ class HistoricalDataLoader:
         # Trim whitespace from string columns (exclude narrative fields and boolean columns)
         for col in df.select_dtypes(include=["object"]).columns:
             # Skip narrative fields and any column that might be boolean
-            if col not in ["narr_accp", "narr_cause", "narr_accf", "narr_inc", "narr_rectification", "cm_inpc"]:
+            if col not in [
+                "narr_accp",
+                "narr_cause",
+                "narr_accf",
+                "narr_inc",
+                "narr_rectification",
+                "cm_inpc",
+            ]:
                 try:
                     df[col] = df[col].str.strip()
                 except AttributeError:
@@ -288,7 +304,7 @@ class HistoricalDataLoader:
                 # Truncate strings exceeding max length
                 df[col] = df[col].astype(str).str[:max_len]
                 # Convert 'nan' string back to None
-                df.loc[df[col] == 'nan', col] = None
+                df.loc[df[col] == "nan", col] = None
 
         # Remove rows with NULL primary keys
         if table == "events" and "ev_id" in df.columns:
@@ -350,7 +366,11 @@ class HistoricalDataLoader:
         df_columns = [col for col in df.columns if col in db_columns_input]
 
         # Log dropped columns
-        dropped = [col for col in df.columns if col not in df_columns and col not in auto_columns]
+        dropped = [
+            col
+            for col in df.columns
+            if col not in df_columns and col not in auto_columns
+        ]
         if dropped:
             logger.info(f"  Dropping columns not in schema: {', '.join(dropped)}")
 
@@ -370,7 +390,13 @@ class HistoricalDataLoader:
             logger.error(f"Failed to fetch existing event IDs: {e}")
             return set()
 
-    def filter_existing_records(self, df: pd.DataFrame, table: str, existing_ev_ids: set, all_db_ev_ids: set = None) -> pd.DataFrame:
+    def filter_existing_records(
+        self,
+        df: pd.DataFrame,
+        table: str,
+        existing_ev_ids: set,
+        all_db_ev_ids: set = None,
+    ) -> pd.DataFrame:
         """Filter out records that already exist in database"""
         if table == "events" and "ev_id" in df.columns:
             # For events table: skip events that already exist in DB
@@ -379,7 +405,9 @@ class HistoricalDataLoader:
             after_count = len(df)
             skipped = before_count - after_count
             if skipped > 0:
-                logger.info(f"  Skipping {skipped:,} existing events (already in database)")
+                logger.info(
+                    f"  Skipping {skipped:,} existing events (already in database)"
+                )
             return df
         elif table != "events" and "ev_id" in df.columns and all_db_ev_ids is not None:
             # For child tables: only keep records whose parent event exists in DB
@@ -389,11 +417,19 @@ class HistoricalDataLoader:
             after_count = len(df)
             skipped = before_count - after_count
             if skipped > 0:
-                logger.info(f"  Skipping {skipped:,} records (parent events not in database)")
+                logger.info(
+                    f"  Skipping {skipped:,} records (parent events not in database)"
+                )
             return df
         return df
 
-    def load_table(self, table: str, chunk_size: int = 1000, existing_ev_ids: set = None, all_db_ev_ids: set = None) -> dict:
+    def load_table(
+        self,
+        table: str,
+        chunk_size: int = 1000,
+        existing_ev_ids: set = None,
+        all_db_ev_ids: set = None,
+    ) -> dict:
         """Load single table from CSV to PostgreSQL"""
 
         csv_file = self.data_dir / f"{table}.csv"
@@ -413,29 +449,40 @@ class HistoricalDataLoader:
             total_rows = len(df)
 
             if total_rows == 0:
-                logger.warning(f"  Empty CSV file, skipping...")
+                logger.warning("  Empty CSV file, skipping...")
                 return {"status": "skipped", "reason": "empty"}
 
             logger.info(f"  Rows: {total_rows:,}")
             logger.info(f"  Columns: {len(df.columns)}")
 
             # Clean and transform
-            logger.info(f"  Cleaning data...")
+            logger.info("  Cleaning data...")
             df = self.clean_dataframe(df, table)
 
             # Filter existing records (skip duplicates)
             if existing_ev_ids is not None or all_db_ev_ids is not None:
-                df = self.filter_existing_records(df, table, existing_ev_ids if existing_ev_ids else set(), all_db_ev_ids)
+                df = self.filter_existing_records(
+                    df,
+                    table,
+                    existing_ev_ids if existing_ev_ids else set(),
+                    all_db_ev_ids,
+                )
                 if len(df) == 0:
-                    logger.warning(f"  All records already exist or have no parent events, skipping table load")
-                    return {"status": "skipped", "reason": "all_filtered", "rows_skipped": total_rows}
+                    logger.warning(
+                        "  All records already exist or have no parent events, skipping table load"
+                    )
+                    return {
+                        "status": "skipped",
+                        "reason": "all_filtered",
+                        "rows_skipped": total_rows,
+                    }
 
             # Align to schema
-            logger.info(f"  Aligning to PostgreSQL schema...")
+            logger.info("  Aligning to PostgreSQL schema...")
             df = self.align_dataframe_to_schema(df, table)
 
             # Load to PostgreSQL
-            logger.info(f"  Loading to PostgreSQL...")
+            logger.info("  Loading to PostgreSQL...")
             logger.info(f"  DataFrame shape before insert: {df.shape}")
             logger.info(f"  DataFrame columns: {list(df.columns)}")
             if len(df) > 0:
@@ -446,7 +493,16 @@ class HistoricalDataLoader:
             # For tables with composite primary keys, use INSERT ... ON CONFLICT DO NOTHING
             # to skip duplicates gracefully
             with self.engine.begin() as conn:
-                if table in ["aircraft", "Flight_Crew", "injury", "Findings", "Occurrences", "seq_of_events", "Events_Sequence", "engines"]:
+                if table in [
+                    "aircraft",
+                    "Flight_Crew",
+                    "injury",
+                    "Findings",
+                    "Occurrences",
+                    "seq_of_events",
+                    "Events_Sequence",
+                    "engines",
+                ]:
                     # Use custom insert method with ON CONFLICT DO NOTHING
                     from sqlalchemy import MetaData, Table as SQLATable
                     from sqlalchemy.dialects.postgresql import insert
@@ -455,9 +511,11 @@ class HistoricalDataLoader:
                     sql_table = SQLATable(table.lower(), metadata, autoload_with=conn)
 
                     # Insert in chunks
-                    chunk_list = [df[i:i+chunk_size] for i in range(0, len(df), chunk_size)]
+                    chunk_list = [
+                        df[i : i + chunk_size] for i in range(0, len(df), chunk_size)
+                    ]
                     for chunk in chunk_list:
-                        records = chunk.to_dict('records')
+                        records = chunk.to_dict("records")
                         stmt = insert(sql_table).values(records)
                         stmt = stmt.on_conflict_do_nothing()
                         conn.execute(stmt)
@@ -475,7 +533,7 @@ class HistoricalDataLoader:
             duration = (datetime.now() - start_time).total_seconds()
             rows_per_sec = total_rows / duration if duration > 0 else 0
 
-            logger.info(f"  ✓ Success!")
+            logger.info("  ✓ Success!")
             logger.info(f"  Duration: {duration:.1f}s ({rows_per_sec:.0f} rows/sec)")
 
             return {
@@ -491,6 +549,7 @@ class HistoricalDataLoader:
         except Exception as e:
             logger.error(f"  ✗ Failed: {e}")
             import traceback
+
             logger.error(traceback.format_exc())
             return {"status": "failed", "error": type(e).__name__, "message": str(e)}
 
