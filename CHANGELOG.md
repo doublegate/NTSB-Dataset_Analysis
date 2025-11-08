@@ -8,6 +8,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+#### Monitoring & Observability (Sprint 3 Week 3 - 2025-11-07)
+- **Notification System** (`airflow/plugins/notification_callbacks.py`, 449 lines)
+  - Slack webhook integration for real-time alerts (<30s latency)
+  - Email notifications via SMTP (Gmail App Password support)
+  - CRITICAL alerts for DAG failures with error details and log URLs
+  - SUCCESS notifications with metrics (events loaded, duration, duplicates)
+  - WARNING alerts for data quality issues
+  - HTML-formatted emails with professional styling
+
+- **Anomaly Detection** (`scripts/detect_anomalies.py`, 480 lines)
+  - 5 automated data quality checks run after each data load
+  - Check 1: Missing critical fields (ev_id, ev_date, coordinates)
+  - Check 2: Coordinate outliers (lat/lon outside valid bounds)
+  - Check 3: Statistical anomalies (event count drop >50%)
+  - Check 4: Referential integrity (orphaned child records)
+  - Check 5: Duplicate detection (same ev_id multiple times)
+  - CLI interface with JSON output option
+  - Exit codes: 0=pass, 1=warning, 2=critical
+
+- **Monitoring Views** (`scripts/create_monitoring_views.sql`, 323 lines)
+  - `vw_database_metrics`: Table sizes, row counts, vacuum/analyze stats
+  - `vw_data_quality_checks`: 9 quality metrics with severity levels
+  - `vw_monthly_event_trends`: Event counts, fatalities, injuries by month
+  - `vw_database_health`: Overall system health snapshot
+  - All views return real-time data (no materialization needed)
+
+- **Monitoring Setup Guide** (`docs/MONITORING_SETUP_GUIDE.md`, 754 lines)
+  - Complete Slack integration guide with webhooks
+  - Gmail SMTP configuration with App Password setup
+  - Monitoring view usage examples with sample outputs
+  - Anomaly detection interpretation guide
+  - Troubleshooting section (5 common issues + diagnostics)
+  - Customization examples for adding checks/views
+  - Production readiness checklist
+
+- **Sprint 3 Week 3 Completion Report** (`docs/SPRINT_3_WEEK_3_COMPLETION_REPORT.md`, 640 lines)
+  - Comprehensive deliverables summary (2,006 lines total)
+  - Testing results (all 5 tests passed)
+  - Performance metrics (queries <50ms, anomaly detection <2s)
+  - Lessons learned and technical decisions
+  - Production readiness assessment
+  - Next steps and recommendations
+
 #### Apache Airflow Infrastructure (Sprint 3 Week 1 - 2025-11-06)
 - **Docker Compose Setup** (`airflow/docker-compose.yml`, 196 lines)
   - 3 services: postgres-airflow (metadata), webserver (UI), scheduler
