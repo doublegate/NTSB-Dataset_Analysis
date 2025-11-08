@@ -2,7 +2,6 @@
 """Advanced analysis examples for NTSB database"""
 
 import pandas as pd
-import numpy as np
 import duckdb
 from pathlib import Path
 
@@ -229,12 +228,22 @@ def seasonal_analysis():
 
         # Add month names
         month_names = {
-            1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
-            7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
+            1: "Jan",
+            2: "Feb",
+            3: "Mar",
+            4: "Apr",
+            5: "May",
+            6: "Jun",
+            7: "Jul",
+            8: "Aug",
+            9: "Sep",
+            10: "Oct",
+            11: "Nov",
+            12: "Dec",
         }
-        df['month_name'] = df['month'].map(month_names)
+        df["month_name"] = df["month"].map(month_names)
 
-        print(df[['month', 'month_name', 'accident_count']].to_string(index=False))
+        print(df[["month", "month_name", "accident_count"]].to_string(index=False))
         return df
 
     except Exception as e:
@@ -243,9 +252,9 @@ def seasonal_analysis():
         return None
 
 
-def export_summary_report(output_file: str = 'outputs/summary_report.csv'):
+def export_summary_report(output_file: str = "outputs/summary_report.csv"):
     """Generate and export comprehensive summary report"""
-    print(f"\n📝 Generating summary report...")
+    print("\n📝 Generating summary report...")
 
     query = """
     SELECT
@@ -274,7 +283,7 @@ def export_summary_report(output_file: str = 'outputs/summary_report.csv'):
             return None
 
         # Create output directory
-        Path('outputs').mkdir(exist_ok=True)
+        Path("outputs").mkdir(exist_ok=True)
 
         # Export to CSV
         df.to_csv(output_file, index=False)
@@ -288,14 +297,16 @@ def export_summary_report(output_file: str = 'outputs/summary_report.csv'):
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("🚀 NTSB Aviation Accident Database - Advanced Analysis")
     print("=" * 60)
 
     # Check if data exists
-    if not Path('data/avall-events.csv').exists():
+    if not Path("data/avall-events.csv").exists():
         print("\n❌ Error: data/avall-events.csv not found")
-        print("   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb")
+        print(
+            "   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb"
+        )
         exit(1)
 
     try:
@@ -307,10 +318,10 @@ if __name__ == '__main__':
         seasonal_analysis()
 
         # Optional analyses (require additional tables)
-        if Path('data/Occurrences.csv').exists():
+        if Path("data/Occurrences.csv").exists():
             analyze_phase_of_flight()
 
-        if Path('data/Findings.csv').exists():
+        if Path("data/Findings.csv").exists():
             analyze_causes()
 
         # Export report

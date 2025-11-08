@@ -1,7 +1,9 @@
 # NTSB Aviation Accident Database Analysis
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Database Size](https://img.shields.io/badge/Database%20Size-512%20MB-blue.svg)](https://github.com/doublegate/NTSB-Dataset_Analysis)
+[![Database Size](https://img.shields.io/badge/Database%20Size-801%20MB-blue.svg)](https://github.com/doublegate/NTSB-Dataset_Analysis)
+[![Events](https://img.shields.io/badge/Events-179%2C809-green.svg)](https://github.com/doublegate/NTSB-Dataset_Analysis)
+[![Coverage](https://img.shields.io/badge/Coverage-1962--2025%20(64%20years)-brightgreen.svg)](https://github.com/doublegate/NTSB-Dataset_Analysis)
 [![Last Commit](https://img.shields.io/github/last-commit/doublegate/NTSB-Dataset_Analysis?label=Last%20Commit)](https://github.com/doublegate/NTSB-Dataset_Analysis/commits/main)
 [![Data Source: NTSB](https://img.shields.io/badge/Data-NTSB-blue.svg)](https://www.ntsb.gov/Pages/AviationQueryV2.aspx)
 [![Fish Shell](https://img.shields.io/badge/Shell-Fish-green.svg)](https://fishshell.com/)
@@ -59,25 +61,28 @@ This repository contains three comprehensive Microsoft Access databases and an o
 
 ### Source Databases (MDB Files)
 
-| Database | Time Period | Size | Records |
-|----------|-------------|------|---------|
-| `datasets/avall.mdb` | 2008 - Present | 537 MB | Updated monthly |
-| `datasets/Pre2008.mdb` | 1982 - 2007 | 893 MB | Static snapshot |
-| `datasets/PRE1982.MDB` | 1962 - 1981 | 188 MB | Static snapshot |
+| Database | Time Period | Size | Records | Status |
+|----------|-------------|------|---------|--------|
+| `datasets/avall.mdb` | 2008 - Present | 537 MB | Updated monthly | ✅ Integrated (Airflow automation) |
+| `datasets/Pre2008.mdb` | 1982 - 2007 | 893 MB | Static snapshot | ✅ Integrated (historical) |
+| `datasets/PRE1982.MDB` | 1962 - 1981 | 188 MB | 87,038 events | ✅ Integrated (legacy ETL) |
 
 ### PostgreSQL Database
 
 | Database | Events | Total Rows | Size | Coverage |
 |----------|--------|------------|------|----------|
-| `ntsb_aviation` | 92,771 | ~733K | 512 MB | 1977-2025 (48 years) |
+| `ntsb_aviation` | 179,809 | ~1.3M | 801 MB | 1962-2025 (64 years) |
 
 **Features:**
+- Complete 64-year historical coverage (1962-2025, zero gaps)
 - Optimized schema with PostGIS for geospatial analysis
 - 6 materialized views for fast analytical queries
-- 59 indexes for query performance (98.81% buffer cache hit ratio)
-- Data quality: 9/9 checks passed, 0 anomalies, 100% referential integrity
+- 59 indexes for query performance (96.48% buffer cache hit ratio)
+- Code mapping system (5 tables, 945+ legacy codes decoded)
+- Data quality: 100% (zero duplicates, zero orphans, 100% FK integrity)
 - Automated Airflow ETL pipeline with monitoring and notifications
 - Anomaly detection with Slack/Email alerts
+- Database health score: 98/100 (excellent)
 
 ## Database Structure
 
@@ -134,16 +139,22 @@ cd NTSB-Dataset_Analysis
 source .venv/bin/activate
 python scripts/load_with_staging.py --source datasets/avall.mdb
 
-# 4. Load historical data (optional, 1982-2007)
+# 4. Load historical data (1982-2007)
 python scripts/load_with_staging.py --source datasets/Pre2008.mdb
 
-# 5. Optimize queries (create materialized views + indexes)
+# 5. Load legacy data (1962-1981, one-time setup)
+python scripts/load_pre1982.py
+
+# 6. Optimize queries (create materialized views + indexes)
 psql -d ntsb_aviation -f scripts/optimize_queries.sql
 
-# 6. Run performance benchmarks (optional)
+# 7. Run database maintenance (monthly recommended)
+./scripts/maintain_database.sh ntsb_aviation
+
+# 8. Run performance benchmarks (optional)
 psql -d ntsb_aviation -f scripts/test_performance.sql
 
-# 7. Start querying (sub-millisecond response times)
+# 9. Start querying (sub-millisecond response times)
 psql -d ntsb_aviation -c "SELECT * FROM mv_yearly_stats ORDER BY year DESC LIMIT 5;"
 ```
 
@@ -277,8 +288,11 @@ Comprehensive documentation is available:
 - **[SPRINT_3_WEEK_1_COMPLETION_REPORT.md](docs/archive/SPRINT_3_WEEK_1_COMPLETION_REPORT.md)** - Sprint 3 Week 1: Airflow infrastructure setup (756 lines)
 - **[SPRINT_3_WEEK_2_COMPLETION_REPORT.md](docs/archive/SPRINT_3_WEEK_2_COMPLETION_REPORT.md)** - Sprint 3 Week 2: Production DAG + 7 bug fixes (896 lines)
 - **[SPRINT_3_WEEK_3_COMPLETION_REPORT.md](docs/archive/SPRINT_3_WEEK_3_COMPLETION_REPORT.md)** - Sprint 3 Week 3: Monitoring & observability (640 lines)
+- **[SPRINT_4_COMPLETION_REPORT.md](docs/SPRINT_4_COMPLETION_REPORT.md)** - Phase 1 Sprint 4: PRE1982 integration complete (932 lines)
 - **[PERFORMANCE_BENCHMARKS.md](docs/PERFORMANCE_BENCHMARKS.md)** - Comprehensive performance analysis (450+ lines)
 - **[PRE1982_ANALYSIS.md](docs/PRE1982_ANALYSIS.md)** - PRE1982.MDB schema analysis and integration strategy (408 lines)
+- **[DATABASE_MAINTENANCE_REPORT.md](docs/DATABASE_MAINTENANCE_REPORT.md)** - Database maintenance analysis (444 lines)
+- **[MAINTENANCE_QUICK_REFERENCE.md](docs/MAINTENANCE_QUICK_REFERENCE.md)** - Maintenance quick reference (226 lines)
 
 ### Airflow ETL Pipeline & Monitoring
 - **[AIRFLOW_SETUP_GUIDE.md](docs/AIRFLOW_SETUP_GUIDE.md)** - Complete Airflow setup and usage guide (874 lines)
@@ -304,8 +318,9 @@ Sprint 2 query optimization achieved exceptional performance on the PostgreSQL d
 - **p50 Latency**: ~2ms (median query response time)
 - **p95 Latency**: ~13ms (95th percentile)
 - **p99 Latency**: ~47ms (99th percentile)
-- **Buffer Cache Hit Ratio**: 98.81% (excellent memory utilization)
-- **Index Usage**: 99.99% on primary tables (events, aircraft)
+- **Buffer Cache Hit Ratio**: 96.48% (excellent memory utilization)
+- **Index Usage**: 99.98% on primary tables (events, aircraft)
+- **Database Health Score**: 98/100 (excellent)
 
 ### Materialized Views (30-114x Speedup)
 - **mv_yearly_stats**: Yearly accident statistics (47 rows, 114x faster)
@@ -334,13 +349,26 @@ All performance metrics meet or exceed enterprise database standards. See [Perfo
   - 11 core tables with triggers, constraints, indexes
   - Generated columns (ev_year, ev_month, location_geom)
 - **`scripts/transfer_ownership.sql`** (98 lines) - Ownership transfer automation
+- **`scripts/maintain_database.sql`** (391 lines) - Comprehensive database maintenance
+  - 10-phase automated grooming (ANALYZE, VACUUM, reindex)
+  - Deadlock-free execution with lock timeouts
+  - Detailed performance reporting
+- **`scripts/maintain_database.sh`** - Bash wrapper with timestamped logging
 
 ### Data Loading & ETL
-- **`scripts/load_with_staging.py`** (597 lines) - Production-grade ETL loader
+- **`scripts/load_with_staging.py`** (842 lines) - Production-grade ETL loader
   - Staging table pattern for safe data loading
   - Duplicate detection and deduplication logic
   - Load tracking prevents accidental re-loads
   - Handles 15,000-45,000 rows/sec throughput
+- **`scripts/load_pre1982.py`** (1,061 lines) - Legacy data ETL pipeline
+  - Custom schema transformation (denormalized → normalized)
+  - Synthetic ev_id generation (YYYYMMDDX{RecNum:06d})
+  - Wide-to-tall injury/crew conversion (50+ columns → rows)
+  - Code decoding via lookup tables (945+ legacy codes)
+- **`scripts/create_code_mappings.sql`** (178 lines) - Code mapping tables
+  - 5 lookup tables (states, ages, cause_factors, damage_levels, crew_categories)
+- **`scripts/populate_code_tables.py`** (245 lines) - Code bulk loader
 - **`scripts/create_staging_tables.sql`** (279 lines) - Staging infrastructure
   - 11 staging tables in separate schema
   - Helper functions for row counts and duplicate stats
@@ -631,26 +659,74 @@ All example scripts have been tested and verified:
 
 ## Project Status
 
-**Version**: 2.1.0
-**Status**: Production-ready with high-performance PostgreSQL database, automated ETL, and monitoring infrastructure
-**Last Updated**: November 7, 2025
-**Current Sprint**: Phase 1 Sprint 3 Week 3 - ✅ COMPLETE (Monitoring & Observability)
+**Version**: 2.2.0
+**Status**: Production-ready with complete historical coverage, automated ETL, and monitoring infrastructure
+**Last Updated**: November 8, 2025
+**Current Sprint**: Phase 1 - ✅ COMPLETE (All 4 Sprints Finished)
 **Production Ready**: December 1st, 2025 first production run
 
 This repository is fully functional and production-ready with:
-- Three comprehensive databases (1962-present, 1.6GB MDB files)
-- High-performance PostgreSQL database (512 MB, 92,771 events, ~733K total rows)
+- **Complete 64-year historical coverage** (1962-2025, 179,809 events, zero gaps)
+- Three comprehensive databases (1962-present, 1.6GB MDB files, all integrated)
+- High-performance PostgreSQL database (801 MB, 179,809 events, ~1.3M total rows)
 - Query optimization: 6 materialized views, 59 indexes (30-114x speedup)
-- Performance: p50 2ms, p95 13ms, p99 47ms, 98.81% buffer cache hit ratio
+- Performance: p50 2ms, p95 13ms, p99 47ms, 96.48% buffer cache hit ratio
+- Database health: 98/100 score (excellent)
+- Code mapping system: 5 tables, 945+ legacy codes decoded
 - Monitoring infrastructure: Slack/Email notifications, anomaly detection, 4 monitoring views
 - Automated Airflow ETL pipeline with production DAG (8 tasks, 1m 50s baseline)
+- Database maintenance automation (10-phase grooming, ~8s execution)
 - Automated one-command database setup (no manual SQL required)
 - Production-grade ETL with staging tables and duplicate detection
-- Data quality: 9/9 checks passed, 0 anomalies, 100% referential integrity
+- Data quality: 100% (zero duplicates, zero orphans, 100% FK integrity)
 - Comprehensive data validation suite
 - Complete extraction and analysis toolkit
 - Active maintenance and monthly data updates (avall.mdb)
 - Production-ready Python examples with robust error handling
+
+### Sprint 4 Achievements (November 8, 2025)
+
+✅ **Phase 1 Sprint 4: PRE1982 Historical Data Integration** - COMPLETE
+
+**Major Achievement**: Complete 64-year historical coverage (1962-2025)
+
+- **Legacy Data Integration** (87,038 events, 1962-1981)
+  - Custom ETL pipeline for denormalized schema transformation
+  - Synthetic ev_id generation (YYYYMMDDX{RecNum:06d} format)
+  - Wide-to-tall conversion (50+ injury/crew columns → normalized rows)
+  - 2.78× data expansion for proper normalization
+
+- **Code Mapping System** (5 tables, 945+ codes)
+  - State codes (56 states/territories)
+  - Age group codes (12 categories)
+  - Cause/factor codes (861 distinct findings)
+  - Damage level codes (5 severity levels)
+  - Crew category codes (11 certification types)
+
+- **Database Growth**
+  - Events: 92,771 → 179,809 (+87,038, +93.7%)
+  - Total Rows: ~733K → ~1.3M (+564,468, +77%)
+  - Database Size: 512 MB → 801 MB (+288 MB)
+  - Date Coverage: 1977-2025 → 1962-2025 (+16 years)
+
+- **Database Maintenance Automation**
+  - 10-phase comprehensive grooming script (391 lines)
+  - ANALYZE, VACUUM, reindex with deadlock prevention
+  - Execution time: ~8 seconds for complete maintenance
+  - Health score: 98/100 (excellent)
+
+- **Data Quality**: 100%
+  - Zero duplicate events
+  - Zero orphaned records
+  - 100% foreign key integrity
+  - All coordinates validated
+
+- **13 Critical Bug Fixes**
+  - INTEGER/TIME/CSV quoting conversions
+  - Complex data type handling
+  - Schema transformation edge cases
+
+See [Sprint 4 Completion Report](docs/SPRINT_4_COMPLETION_REPORT.md) for comprehensive documentation.
 
 ### Sprint 3 Week 3 Achievements (November 7, 2025)
 
@@ -745,11 +821,14 @@ See [Sprint 2 Completion Report](SPRINT_2_COMPLETION_REPORT.md) for detailed met
 
 **Current Status**: ✅ Phase 1 Complete - Production-Ready Infrastructure
 
-**Completed Phase 1 Deliverables**:
-- ✅ PostgreSQL database with 512 MB, 92,771 events, ~733K rows
+**Completed Phase 1 Deliverables** (All 4 Sprints):
+- ✅ PostgreSQL database with 801 MB, 179,809 events, ~1.3M rows
+- ✅ Complete 64-year historical coverage (1962-2025, zero gaps)
 - ✅ Automated ETL pipeline with Airflow (8-task production DAG)
+- ✅ Database maintenance automation (10-phase grooming, ~8s execution)
+- ✅ Code mapping system (5 tables, 945+ legacy codes decoded)
 - ✅ Monitoring & observability (Slack/Email, anomaly detection, 4 views)
-- ✅ Data quality: 9/9 checks passed, 0 anomalies, 100% integrity
+- ✅ Data quality: 100% (zero duplicates, zero orphans, 100% FK integrity)
 - ✅ Query optimization: 6 materialized views, 59 indexes (30-114x speedup)
 - ✅ Production-ready: December 1st, 2025 first production run
 
@@ -769,13 +848,9 @@ See [Sprint 2 Completion Report](SPRINT_2_COMPLETION_REPORT.md) for detailed met
 - MLflow model versioning and serving
 - Automated model retraining pipeline
 
-**Historical Data Integration** (Priority 3)
-- PRE1982.MDB integration (1962-1981 data)
-- Custom ETL for legacy schema transformation
-- Mapping coded fields to modern taxonomy
-- Estimated ~87,000 additional events
-
 **Estimated Timeline**: 12 weeks (December 2025 - February 2026)
+
+**Note**: PRE1982.MDB historical data integration originally planned for Phase 2 was completed ahead of schedule in Sprint 4.
 
 See [Phase 2 Analytics Plan](to-dos/PHASE_2_ANALYTICS.md) for detailed implementation roadmap.
 

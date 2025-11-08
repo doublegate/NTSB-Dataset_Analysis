@@ -6,9 +6,9 @@ import duckdb
 from pathlib import Path
 
 try:
-    import geopandas as gpd
     import folium
     from folium.plugins import MarkerCluster, HeatMap
+
     GEOSPATIAL_AVAILABLE = True
 except ImportError:
     GEOSPATIAL_AVAILABLE = False
@@ -20,7 +20,9 @@ def load_events_with_coordinates(year_filter: int = 2020):
     """Load events that have valid coordinates"""
     # Validate year parameter
     if not isinstance(year_filter, int) or year_filter < 1962 or year_filter > 2100:
-        raise ValueError(f"Invalid year filter: {year_filter}. Must be between 1962 and 2100")
+        raise ValueError(
+            f"Invalid year filter: {year_filter}. Must be between 1962 and 2100"
+        )
 
     query = f"""
     SELECT
@@ -62,7 +64,9 @@ def load_events_with_coordinates(year_filter: int = 2020):
         raise
 
 
-def create_accident_map(df: pd.DataFrame, output_file: str = 'outputs/accident_map.html'):
+def create_accident_map(
+    df: pd.DataFrame, output_file: str = "outputs/accident_map.html"
+):
     """Create interactive map of accident locations"""
     if not GEOSPATIAL_AVAILABLE:
         print("❌ Cannot create map: geopandas/folium not installed")
@@ -75,9 +79,7 @@ def create_accident_map(df: pd.DataFrame, output_file: str = 'outputs/accident_m
     try:
         # Create base map centered on US
         m = folium.Map(
-            location=[39.8283, -98.5795],
-            zoom_start=4,
-            tiles='OpenStreetMap'
+            location=[39.8283, -98.5795], zoom_start=4, tiles="OpenStreetMap"
         )
 
         # Create marker cluster
@@ -88,60 +90,64 @@ def create_accident_map(df: pd.DataFrame, output_file: str = 'outputs/accident_m
         for idx, row in df.iterrows():
             try:
                 # Validate coordinates
-                lat = float(row['latitude'])
-                lon = float(row['longitude'])
+                lat = float(row["latitude"])
+                lon = float(row["longitude"])
 
                 if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
                     continue
 
                 # Create popup text with safe string conversion
                 popup_text = f"""
-                <b>Event ID:</b> {row['ev_id']}<br>
-                <b>Date:</b> {row.get('ev_date', 'N/A')}<br>
-                <b>Location:</b> {row.get('ev_city', 'N/A')}, {row.get('ev_state', 'N/A')}<br>
-                <b>Type:</b> {row.get('ev_type', 'N/A')}<br>
-                <b>Fatalities:</b> {row.get('fatalities', 0)}<br>
-                <b>Serious Injuries:</b> {row.get('serious_injuries', 0)}
+                <b>Event ID:</b> {row["ev_id"]}<br>
+                <b>Date:</b> {row.get("ev_date", "N/A")}<br>
+                <b>Location:</b> {row.get("ev_city", "N/A")}, {row.get("ev_state", "N/A")}<br>
+                <b>Type:</b> {row.get("ev_type", "N/A")}<br>
+                <b>Fatalities:</b> {row.get("fatalities", 0)}<br>
+                <b>Serious Injuries:</b> {row.get("serious_injuries", 0)}
                 """
 
                 # Color code by severity
-                if row.get('fatalities', 0) > 0:
-                    color = 'red'
-                    icon = 'exclamation-triangle'
-                elif row.get('serious_injuries', 0) > 0:
-                    color = 'orange'
-                    icon = 'warning'
+                if row.get("fatalities", 0) > 0:
+                    color = "red"
+                    icon = "exclamation-triangle"
+                elif row.get("serious_injuries", 0) > 0:
+                    color = "orange"
+                    icon = "warning"
                 else:
-                    color = 'blue'
-                    icon = 'info-sign'
+                    color = "blue"
+                    icon = "info-sign"
 
                 folium.Marker(
                     location=[lat, lon],
                     popup=folium.Popup(popup_text, max_width=300),
                     tooltip=f"{row.get('ev_city', 'Unknown')}, {row.get('ev_state', 'N/A')}",
-                    icon=folium.Icon(color=color, icon=icon)
+                    icon=folium.Icon(color=color, icon=icon),
                 ).add_to(marker_cluster)
 
                 markers_added += 1
 
-            except (ValueError, TypeError, KeyError) as e:
+            except (ValueError, TypeError, KeyError):
                 # Skip rows with invalid data
                 continue
 
         # Create output directory
-        Path('outputs').mkdir(exist_ok=True)
+        Path("outputs").mkdir(exist_ok=True)
 
         # Save map
         m.save(output_file)
         print(f"✅ Map saved to: {output_file}")
-        print(f"   {markers_added:,} accident locations plotted (from {len(df):,} total events)")
+        print(
+            f"   {markers_added:,} accident locations plotted (from {len(df):,} total events)"
+        )
 
     except Exception as e:
         print(f"❌ Error creating map: {e}")
         raise
 
 
-def create_heatmap(df: pd.DataFrame, output_file: str = 'outputs/accident_heatmap.html'):
+def create_heatmap(
+    df: pd.DataFrame, output_file: str = "outputs/accident_heatmap.html"
+):
     """Create heatmap of accident density"""
     if not GEOSPATIAL_AVAILABLE:
         print("❌ Cannot create heatmap: geopandas/folium not installed")
@@ -154,17 +160,15 @@ def create_heatmap(df: pd.DataFrame, output_file: str = 'outputs/accident_heatma
     try:
         # Create base map
         m = folium.Map(
-            location=[39.8283, -98.5795],
-            zoom_start=4,
-            tiles='OpenStreetMap'
+            location=[39.8283, -98.5795], zoom_start=4, tiles="OpenStreetMap"
         )
 
         # Prepare data for heatmap with validation
         heat_data = []
         for idx, row in df.iterrows():
             try:
-                lat = float(row['latitude'])
-                lon = float(row['longitude'])
+                lat = float(row["latitude"])
+                lon = float(row["longitude"])
 
                 # Validate coordinates
                 if -90 <= lat <= 90 and -180 <= lon <= 180:
@@ -180,7 +184,7 @@ def create_heatmap(df: pd.DataFrame, output_file: str = 'outputs/accident_heatma
         HeatMap(heat_data, radius=15, blur=25, max_zoom=13).add_to(m)
 
         # Create output directory
-        Path('outputs').mkdir(exist_ok=True)
+        Path("outputs").mkdir(exist_ok=True)
 
         # Save map
         m.save(output_file)
@@ -192,7 +196,9 @@ def create_heatmap(df: pd.DataFrame, output_file: str = 'outputs/accident_heatma
         raise
 
 
-def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fatal_accidents_map.html'):
+def create_fatal_accidents_map(
+    df: pd.DataFrame, output_file: str = "outputs/fatal_accidents_map.html"
+):
     """Create map showing only fatal accidents"""
     if not GEOSPATIAL_AVAILABLE:
         print("❌ Cannot create map: geopandas/folium not installed")
@@ -204,7 +210,7 @@ def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fat
 
     try:
         # Filter for fatal accidents
-        fatal_df = df[df['fatalities'] > 0].copy()
+        fatal_df = df[df["fatalities"] > 0].copy()
 
         if len(fatal_df) == 0:
             print("⚠️  No fatal accidents found in dataset")
@@ -214,9 +220,7 @@ def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fat
 
         # Create base map
         m = folium.Map(
-            location=[39.8283, -98.5795],
-            zoom_start=4,
-            tiles='OpenStreetMap'
+            location=[39.8283, -98.5795], zoom_start=4, tiles="OpenStreetMap"
         )
 
         # Add markers for fatal accidents
@@ -224,20 +228,20 @@ def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fat
         for idx, row in fatal_df.iterrows():
             try:
                 # Validate coordinates
-                lat = float(row['latitude'])
-                lon = float(row['longitude'])
+                lat = float(row["latitude"])
+                lon = float(row["longitude"])
 
                 if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
                     continue
 
-                fatalities = int(row.get('fatalities', 0))
+                fatalities = int(row.get("fatalities", 0))
                 if fatalities <= 0:
                     continue
 
                 popup_text = f"""
-                <b>Event ID:</b> {row['ev_id']}<br>
-                <b>Date:</b> {row.get('ev_date', 'N/A')}<br>
-                <b>Location:</b> {row.get('ev_city', 'N/A')}, {row.get('ev_state', 'N/A')}<br>
+                <b>Event ID:</b> {row["ev_id"]}<br>
+                <b>Date:</b> {row.get("ev_date", "N/A")}<br>
+                <b>Location:</b> {row.get("ev_city", "N/A")}, {row.get("ev_state", "N/A")}<br>
                 <b>Fatalities:</b> {fatalities}<br>
                 """
 
@@ -249,10 +253,10 @@ def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fat
                     radius=radius,
                     popup=folium.Popup(popup_text, max_width=300),
                     tooltip=f"{fatalities} fatalities",
-                    color='red',
+                    color="red",
                     fill=True,
-                    fillColor='red',
-                    fillOpacity=0.6
+                    fillColor="red",
+                    fillOpacity=0.6,
                 ).add_to(m)
 
                 markers_added += 1
@@ -261,7 +265,7 @@ def create_fatal_accidents_map(df: pd.DataFrame, output_file: str = 'outputs/fat
                 continue
 
         # Create output directory
-        Path('outputs').mkdir(exist_ok=True)
+        Path("outputs").mkdir(exist_ok=True)
 
         # Save map
         m.save(output_file)
@@ -310,14 +314,16 @@ def analyze_by_region():
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("🗺️  NTSB Aviation Accident Database - Geospatial Analysis")
     print("=" * 60)
 
     # Check if data exists
-    if not Path('data/avall-events.csv').exists():
+    if not Path("data/avall-events.csv").exists():
         print("\n❌ Error: data/avall-events.csv not found")
-        print("   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb")
+        print(
+            "   Extract data first with: ./scripts/extract_all_tables.fish datasets/avall.mdb"
+        )
         exit(1)
 
     try:
