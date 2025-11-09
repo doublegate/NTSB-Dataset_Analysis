@@ -113,7 +113,7 @@ try:
         line=dict(color="red", width=2, dash="dash"),
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     # Show key statistics
     col1, col2, col3 = st.columns(3)
@@ -156,14 +156,14 @@ try:
             color_continuous_scale="Reds",
             labels={"accident_count": "Accidents"},
         )
-        st.plotly_chart(fig_map, use_container_width=True)
+        st.plotly_chart(fig_map, width="stretch")
 
     with col2:
         # Top 10 states table
         st.markdown("#### Top 10 States by Events")
         top_states = state_data.head(10)[["ev_state", "accident_count", "fatal_count"]]
         top_states.columns = ["State", "Total Events", "Fatal Events"]
-        st.dataframe(top_states, hide_index=True, use_container_width=True)
+        st.dataframe(top_states, hide_index=True, width="stretch")
 
 except Exception as e:
     st.error(f"Error loading geographic data: {e}")
@@ -191,7 +191,7 @@ with col1:
             labels={"accident_count": "Total Events", "acft_make": "Aircraft Make"},
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_aircraft, use_container_width=True)
+        st.plotly_chart(fig_aircraft, width="stretch")
 
     except Exception as e:
         st.error(f"Error loading aircraft data: {e}")
@@ -211,7 +211,7 @@ with col2:
             color="fatal_count",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_weather, use_container_width=True)
+        st.plotly_chart(fig_weather, width="stretch")
 
     except Exception as e:
         st.error(f"Error loading weather data: {e}")

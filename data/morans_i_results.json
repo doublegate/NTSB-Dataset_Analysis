@@ -1,0 +1,13 @@
+{
+  "global_morans_i": {
+    "I": 0.011055962393787897,
+    "z_score": 6.633274065766421,
+    "p_value": 3.2832137367254625e-11
+  },
+  "lisa_clusters": {
+    "Not Significant": 70257,
+    "LH (Low-High)": 3002,
+    "HL (High-Low)": 1636,
+    "HH (High-High)": 1258
+  }
+}

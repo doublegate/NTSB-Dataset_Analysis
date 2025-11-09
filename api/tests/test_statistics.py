@@ -5,7 +5,6 @@ Tests for /api/v1/statistics endpoints.
 """
 
 
-
 def test_get_summary(client):
     """Test overall summary statistics."""
     response = client.get("/api/v1/statistics/summary")

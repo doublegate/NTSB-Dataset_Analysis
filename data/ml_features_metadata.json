@@ -1,0 +1,62 @@
+{
+  "created_at": "2025-11-08T23:06:26.611856",
+  "num_samples": 92767,
+  "num_features": 30,
+  "date_range": {
+    "start": "1982-01-01",
+    "end": "2025-10-30"
+  },
+  "feature_groups": {
+    "temporal": 4,
+    "geographic": 5,
+    "aircraft": 5,
+    "operational": 6,
+    "crew": 4,
+    "targets": 3,
+    "identifiers": 3
+  },
+  "target_distributions": {
+    "fatal_outcome": {
+      "0": 74531,
+      "1": 18236
+    },
+    "severity_level": {
+      "NONE": 51084,
+      "FATAL": 18236,
+      "MINOR": 13227,
+      "SERIOUS": 10220
+    }
+  },
+  "missing_values": {
+    "ev_year": 0,
+    "ev_month": 0,
+    "day_of_week": 0,
+    "season": 0,
+    "ev_state": 0,
+    "region": 0,
+    "dec_latitude": 0,
+    "dec_longitude": 0,
+    "has_coordinates": 0,
+    "acft_make_grouped": 0,
+    "acft_category": 0,
+    "damage_severity": 0,
+    "num_eng": 0,
+    "far_part": 0,
+    "flight_phase": 0,
+    "wx_cond_basic": 0,
+    "temp_category": 0,
+    "visibility_category": 0,
+    "flight_plan_filed": 0,
+    "flight_activity": 0,
+    "age_group": 0,
+    "pilot_cert": 0,
+    "experience_level": 0,
+    "recent_activity": 0,
+    "fatal_outcome": 0,
+    "severity_level": 0,
+    "finding_code_grouped": 0,
+    "ev_id": 0,
+    "ntsb_no": 0,
+    "ev_date": 0
+  }
+}

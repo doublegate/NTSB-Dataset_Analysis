@@ -5,7 +5,6 @@ Tests for /api/v1/health endpoints.
 """
 
 
-
 def test_health_check(client):
     """Test basic health check endpoint."""
     response = client.get("/api/v1/health/")

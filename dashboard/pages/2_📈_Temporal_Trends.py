@@ -83,7 +83,7 @@ try:
             color="fatal_count",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_monthly, use_container_width=True)
+        st.plotly_chart(fig_monthly, width="stretch")
 
     with col2:
         st.markdown("#### Key Insights")
@@ -140,7 +140,7 @@ try:
             color="total_fatalities",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_decades, use_container_width=True)
+        st.plotly_chart(fig_decades, width="stretch")
 
     with col2:
         st.markdown("#### Decade Statistics")
@@ -153,7 +153,7 @@ try:
         ]
         decade_display.columns = ["Decade", "Accidents", "Fatalities"]
 
-        st.dataframe(decade_display, hide_index=True, use_container_width=True)
+        st.dataframe(decade_display, hide_index=True, width="stretch")
 
 except Exception as e:
     st.error(f"Error loading decade data: {e}")
@@ -178,7 +178,7 @@ try:
             color="fatal_count",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_dow, use_container_width=True)
+        st.plotly_chart(fig_dow, width="stretch")
 
     with col2:
         st.markdown("#### Weekend vs Weekday")
@@ -269,7 +269,7 @@ try:
             hovermode="x unified",
         )
 
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     # Trend statistics
     col1, col2, col3 = st.columns(3)

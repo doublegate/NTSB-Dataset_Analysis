@@ -132,7 +132,7 @@ try:
             color="fatal_count",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_states, use_container_width=True)
+        st.plotly_chart(fig_states, width="stretch")
 
     with col2:
         st.markdown("#### Top 15 States by Fatalities")
@@ -151,7 +151,7 @@ try:
             color="fatal_count",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_fatal, use_container_width=True)
+        st.plotly_chart(fig_fatal, width="stretch")
 
 except Exception as e:
     st.error(f"Error loading state rankings: {e}")
@@ -231,7 +231,7 @@ try:
             color="fatal_events",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_regional, use_container_width=True)
+        st.plotly_chart(fig_regional, width="stretch")
 
     with col2:
         st.markdown("#### Regional Statistics")
@@ -241,7 +241,7 @@ try:
         ]
         display_df.columns = ["Region", "Events", "Fatal", "Fatal %"]
 
-        st.dataframe(display_df, hide_index=True, use_container_width=True)
+        st.dataframe(display_df, hide_index=True, width="stretch")
 
 except Exception as e:
     st.error(f"Error loading regional data: {e}")
@@ -262,7 +262,7 @@ try:
         color_continuous_scale="Reds",
     )
 
-    st.plotly_chart(fig_choropleth, use_container_width=True)
+    st.plotly_chart(fig_choropleth, width="stretch")
 
     st.info(
         """
@@ -301,7 +301,7 @@ try:
             display_table["State"].str.contains(search.upper(), case=False, na=False)
         ]
 
-    st.dataframe(display_table, hide_index=True, use_container_width=True, height=400)
+    st.dataframe(display_table, hide_index=True, width="stretch", height=400)
 
     # Download button
     csv = display_table.to_csv(index=False)

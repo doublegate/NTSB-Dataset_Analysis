@@ -1,0 +1,55 @@
+{
+  "model_type": "LogisticRegression",
+  "trained_at": "2025-11-08T23:45:27.883008",
+  "random_state": 42,
+  "hyperparameters": {
+    "C": 100,
+    "class_weight": "balanced",
+    "max_iter": 1000,
+    "penalty": "l2",
+    "solver": "lbfgs"
+  },
+  "performance": {
+    "train": {
+      "accuracy": 0.7841483298074461,
+      "precision": 0.4488555078683834,
+      "recall": 0.4301185824936596,
+      "f1": 0.439287339423851,
+      "roc_auc": 0.6975277657228887
+    },
+    "test": {
+      "accuracy": 0.7847364449714347,
+      "precision": 0.45103020039514535,
+      "recall": 0.4381683575541541,
+      "f1": 0.44450625869262866,
+      "roc_auc": 0.6998460558745457
+    }
+  },
+  "num_features": 24,
+  "feature_names": [
+    "ev_year",
+    "ev_month",
+    "day_of_week",
+    "season",
+    "ev_state",
+    "region",
+    "dec_latitude",
+    "dec_longitude",
+    "has_coordinates",
+    "acft_make_grouped",
+    "acft_category",
+    "damage_severity",
+    "num_eng",
+    "far_part",
+    "flight_phase",
+    "wx_cond_basic",
+    "temp_category",
+    "visibility_category",
+    "flight_plan_filed",
+    "flight_activity",
+    "age_group",
+    "pilot_cert",
+    "experience_level",
+    "recent_activity"
+  ]
+}

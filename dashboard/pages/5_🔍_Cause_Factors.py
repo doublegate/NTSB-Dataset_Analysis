@@ -54,7 +54,7 @@ try:
             color_continuous_scale="Reds",
             hover_data=["finding_description"],
         )
-        st.plotly_chart(fig_findings, use_container_width=True)
+        st.plotly_chart(fig_findings, width="stretch")
 
     with col2:
         st.markdown("#### Top 5 Findings")
@@ -70,7 +70,7 @@ try:
             display_findings["Description"].str[:50] + "..."
         )
 
-        st.dataframe(display_findings, hide_index=True, use_container_width=True)
+        st.dataframe(display_findings, hide_index=True, width="stretch")
 
         st.info(
             """
@@ -99,7 +99,7 @@ try:
             names="wx_cond_basic",
             title="Event Distribution by Weather Conditions",
         )
-        st.plotly_chart(fig_weather_dist, use_container_width=True)
+        st.plotly_chart(fig_weather_dist, width="stretch")
 
     with col2:
         # Bar chart of fatality rates
@@ -116,7 +116,7 @@ try:
             color="fatal_rate",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_weather_fatal, use_container_width=True)
+        st.plotly_chart(fig_weather_fatal, width="stretch")
 
     # Weather statistics table
     st.markdown("#### Weather Condition Statistics")
@@ -138,7 +138,7 @@ try:
         "Avg Fatal/Event",
     ]
 
-    st.dataframe(display_weather, hide_index=True, use_container_width=True)
+    st.dataframe(display_weather, hide_index=True, width="stretch")
 
     st.caption(
         """
@@ -172,7 +172,7 @@ try:
                 color_continuous_scale="Reds",
                 labels={"fatality_rate": "Fatal Rate (%)"},
             )
-            st.plotly_chart(fig_phase_tree, use_container_width=True)
+            st.plotly_chart(fig_phase_tree, width="stretch")
         else:
             st.warning("No flight phase data available")
 
@@ -186,7 +186,7 @@ try:
             ]
             display_phases.columns = ["Phase", "Events", "Fatal", "Fatal Rate (%)"]
 
-            st.dataframe(display_phases, hide_index=True, use_container_width=True)
+            st.dataframe(display_phases, hide_index=True, width="stretch")
 
         st.info(
             """
@@ -221,7 +221,7 @@ try:
             color="in_pc_percentage",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_finding_stats, use_container_width=True)
+        st.plotly_chart(fig_finding_stats, width="stretch")
 
     with col2:
         st.markdown("#### Statistics")
@@ -293,9 +293,7 @@ try:
         * 100
     ).round(1)
 
-    st.dataframe(
-        display_findings_table, hide_index=True, use_container_width=True, height=400
-    )
+    st.dataframe(display_findings_table, hide_index=True, width="stretch", height=400)
 
     # Download button
     csv = display_findings_table.to_csv(index=False)

@@ -61,7 +61,7 @@ try:
             color="fatal_accident_count",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_makes, use_container_width=True)
+        st.plotly_chart(fig_makes, width="stretch")
 
     with col2:
         st.markdown("#### Top 5 Makes")
@@ -70,7 +70,7 @@ try:
         display_top5 = top_5[["acft_make", "accident_count", "fatal_accident_count"]]
         display_top5.columns = ["Make", "Accidents", "Fatal"]
 
-        st.dataframe(display_top5, hide_index=True, use_container_width=True)
+        st.dataframe(display_top5, hide_index=True, width="stretch")
 
         # Calculate total
         total_in_top20 = top_makes["accident_count"].sum()
@@ -99,7 +99,7 @@ try:
             names="acft_category",
             title="Event Distribution by Aircraft Category",
         )
-        st.plotly_chart(fig_categories, use_container_width=True)
+        st.plotly_chart(fig_categories, width="stretch")
 
     with col2:
         # Bar chart with fatalities
@@ -112,7 +112,7 @@ try:
             color="total_fatalities",
             color_continuous_scale="Reds",
         )
-        st.plotly_chart(fig_cat_fatal, use_container_width=True)
+        st.plotly_chart(fig_cat_fatal, width="stretch")
 
 except Exception as e:
     st.error(f"Error loading category data: {e}")
@@ -145,7 +145,7 @@ try:
             },
             hover_data=["acft_make", "acft_model"],
         )
-        st.plotly_chart(fig_scatter, use_container_width=True)
+        st.plotly_chart(fig_scatter, width="stretch")
 
     with col2:
         st.markdown("#### Severity Analysis")
@@ -161,9 +161,7 @@ try:
         ]
         display_severity.columns = ["Make", "Model", "Severity", "Accidents"]
 
-        st.dataframe(
-            display_severity, hide_index=True, use_container_width=True, height=300
-        )
+        st.dataframe(display_severity, hide_index=True, width="stretch", height=300)
 
 except Exception as e:
     st.error(f"Error in detailed analysis: {e}")
@@ -235,7 +233,7 @@ try:
     display_table = display_table.sort_values(by=sort_by, ascending=False)
 
     # Display table
-    st.dataframe(display_table, hide_index=True, use_container_width=True, height=400)
+    st.dataframe(display_table, hide_index=True, width="stretch", height=400)
 
     # Download button
     csv = display_table.to_csv(index=False)
