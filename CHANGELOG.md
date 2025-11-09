@@ -185,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Documentation
 
-- **Sprint Report**: 450+ lines (`reports/sprint_9_10_nlp_text_mining_summary.md`)
+- **Sprint Report**: 450+ lines (`notebooks/reports/sprint_9_10_nlp_text_mining_summary.md`)
   - Executive summary with key achievements
   - All 5 NLP method details (TF-IDF, LDA, Word2Vec, NER, Sentiment)
   - Statistical findings and visualizations
@@ -404,7 +404,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/train_random_forest.py` (400 lines): RF training and evaluation
 
 **Documentation**:
-- `reports/sprint_6_7_ml_modeling_summary.md` (comprehensive 600+ line report)
+- `notebooks/reports/sprint_6_7_ml_modeling_summary.md` (comprehensive 600+ line report)
   - Executive summary and achievements
   - Model performance metrics and evaluation
   - Feature engineering pipeline documentation
@@ -789,7 +789,7 @@ This release introduces **comprehensive data analysis capabilities** for the NTS
 
 #### Analysis Reports (2 comprehensive reports)
 
-- **`reports/sprint_1_2_executive_summary.md`** (technical summary)
+- **`notebooks/reports/sprint_1_2_executive_summary.md`** (technical summary)
   - Complete methodology documentation for all 4 notebooks
   - Statistical test results (chi-square, Mann-Whitney U, linear regression, ARIMA)
   - All 20 visualizations documented with descriptions
@@ -870,7 +870,7 @@ This release introduces **comprehensive data analysis capabilities** for the NTS
 - `notebooks/exploratory/04_cause_factor_analysis.ipynb`
 
 **Reports** (2 files):
-- `reports/sprint_1_2_executive_summary.md`
+- `notebooks/reports/sprint_1_2_executive_summary.md`
 - `reports/64_years_aviation_safety_preliminary.md`
 
 **Figures** (20 visualizations):

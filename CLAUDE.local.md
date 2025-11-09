@@ -273,7 +273,7 @@ sudo -u postgres psql -d ntsb_aviation -c "ANALYZE events;"  # ❌ WRONG
 
 #### 2. Analysis Reports (2 comprehensive reports)
 
-- **`reports/sprint_1_2_executive_summary.md`**
+- **`notebooks/reports/sprint_1_2_executive_summary.md`**
   - Technical summary with complete methodology
   - All statistical tests documented (chi-square, Mann-Whitney U, linear regression, ARIMA)
   - 20 visualizations documented with descriptions

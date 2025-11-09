@@ -556,7 +556,7 @@ Four production-ready Jupyter notebooks provide in-depth exploratory analysis:
 
 Two comprehensive reports document Phase 2 findings:
 
-1. **`reports/sprint_1_2_executive_summary.md`** (technical summary)
+1. **`notebooks/reports/sprint_1_2_executive_summary.md`** (technical summary)
    - Complete analysis methodology and results
    - Statistical tests (chi-square, Mann-Whitney U, ARIMA)
    - All 20 visualizations documented
@@ -592,7 +592,7 @@ jupyter nbconvert --to notebook --execute notebooks/exploratory/01_exploratory_d
 **View Reports**:
 ```bash
 # Executive summary (technical)
-cat reports/sprint_1_2_executive_summary.md
+cat notebooks/reports/sprint_1_2_executive_summary.md
 
 # 64-year preliminary report (executive)
 cat reports/64_years_aviation_safety_preliminary.md
@@ -900,7 +900,7 @@ probabilities = model.predict_proba(X_scaled)[:, 1]
 
 ### Documentation
 
-- **`reports/sprint_6_7_ml_modeling_summary.md`** (comprehensive 600+ line report)
+- **`notebooks/reports/sprint_6_7_ml_modeling_summary.md`** (comprehensive 600+ line report)
   - Executive summary and key achievements
   - Model performance metrics and evaluation
   - Feature engineering pipeline documentation
@@ -1094,7 +1094,7 @@ imbalanced-learn==0.12.4
 - `notebooks/geospatial/maps/*.html` - 5 Folium maps
 
 **Comprehensive Report**:
-- `reports/sprint_8_geospatial_analysis_summary.md` - Full analysis report
+- `notebooks/reports/sprint_8_geospatial_analysis_summary.md` - Full analysis report
 
 ### Running Geospatial Analysis
 
@@ -1337,7 +1337,7 @@ open notebooks/geospatial/maps/getis_ord_hotspots.html
 - `models/` directory contains serialized models for reuse
 
 **Report**:
-- `reports/sprint_9_10_nlp_text_mining_summary.md` (comprehensive 600+ line summary)
+- `notebooks/reports/sprint_9_10_nlp_text_mining_summary.md` (comprehensive 600+ line summary)
   - Executive summary and methodology
   - All 5 NLP method results
   - Key findings and statistical tests
