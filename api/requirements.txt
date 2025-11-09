@@ -5,7 +5,7 @@
 # Core Framework
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-python-multipart==0.0.6
+python-multipart==0.0.18
 
 # Database
 sqlalchemy==2.0.44  # Upgraded from 2.0.25 for Python 3.13 compatibility
@@ -37,7 +37,7 @@ httpx==0.26.0
 
 # Code Quality
 ruff==0.1.11
-black==23.12.1
+black==24.3.0
 mypy==1.8.0
 
 # Documentation
