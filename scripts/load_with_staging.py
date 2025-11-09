@@ -623,21 +623,25 @@ class StagingTableLoader:
             logger.warning(
                 f"  ⚠ No primary key found for {table_name}, using basic INSERT"
             )
-            self.cursor.execute(f"""
+            self.cursor.execute(
+                f"""
                 INSERT INTO public.{table_name.lower()} ({column_list})
                 SELECT {column_list} FROM staging.{table_name.lower()}
-            """)
+            """
+            )
         else:
             pk_conflict = ", ".join(pk_columns)
 
             # Use ON CONFLICT DO NOTHING to skip duplicates
             # Qualify column names with 's.' to avoid ambiguity when joining
-            self.cursor.execute(f"""
+            self.cursor.execute(
+                f"""
                 INSERT INTO public.{table_name.lower()} ({column_list})
                 SELECT {qualified_column_list} FROM staging.{table_name.lower()} s
                 INNER JOIN public.events e ON s.ev_id = e.ev_id
                 ON CONFLICT ({pk_conflict}) DO NOTHING
-            """)
+            """
+            )
 
         rows_inserted = self.cursor.rowcount
         self.conn.commit()

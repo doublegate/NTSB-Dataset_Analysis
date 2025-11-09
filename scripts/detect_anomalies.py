@@ -266,30 +266,36 @@ def check_referential_integrity(conn, lookback_days: int = 35) -> Dict[str, Any]
 
     with conn.cursor() as cursor:
         # Check orphaned aircraft records
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) as orphaned_aircraft
             FROM aircraft a
             LEFT JOIN events e ON a.ev_id = e.ev_id
             WHERE e.ev_id IS NULL;
-        """)
+        """
+        )
         orphaned_aircraft = cursor.fetchone()["orphaned_aircraft"]
 
         # Check orphaned findings
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) as orphaned_findings
             FROM findings f
             LEFT JOIN events e ON f.ev_id = e.ev_id
             WHERE e.ev_id IS NULL;
-        """)
+        """
+        )
         orphaned_findings = cursor.fetchone()["orphaned_findings"]
 
         # Check orphaned narratives
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT COUNT(*) as orphaned_narratives
             FROM narratives n
             LEFT JOIN events e ON n.ev_id = e.ev_id
             WHERE e.ev_id IS NULL;
-        """)
+        """
+        )
         orphaned_narratives = cursor.fetchone()["orphaned_narratives"]
 
     if orphaned_aircraft > 0:

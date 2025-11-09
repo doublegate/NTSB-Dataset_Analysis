@@ -1,0 +1,45 @@
+# FastAPI REST API Requirements
+# Phase 2 Sprint 3-4: API Foundation + Geospatial
+# Python 3.13 Compatible (verified 2025-11-08)
+
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
+
+# Database
+sqlalchemy==2.0.44  # Upgraded from 2.0.25 for Python 3.13 compatibility
+psycopg2-binary==2.9.11  # Updated from 2.9.9, has Python 3.13 wheels
+# asyncpg==0.29.0  # REMOVED: No Python 3.13 wheels, not used in codebase
+
+# Geospatial
+geoalchemy2==0.14.3
+shapely==2.0.2  # Has Python 3.13 wheels
+
+# Data Processing (not needed for API - only for dashboard)
+# pandas==2.1.4
+# numpy==1.26.3
+
+# Validation
+pydantic>=2.8.0  # v2.8+ required for Python 3.13 support (currently 2.12.3)
+pydantic-settings==2.1.0
+email-validator==2.1.0
+
+# HTTP & CORS
+python-dotenv==1.0.0
+httpx==0.26.0
+
+# Testing
+pytest==7.4.4
+pytest-asyncio==0.23.3
+pytest-cov==4.1.0
+httpx==0.26.0
+
+# Code Quality
+ruff==0.1.11
+black==23.12.1
+mypy==1.8.0
+
+# Documentation
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4

@@ -9,7 +9,90 @@
 [![Fish Shell](https://img.shields.io/badge/Shell-Fish-green.svg)](https://fishshell.com/)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 
-Complete archive and analysis toolkit for National Transportation Safety Board (NTSB) aviation accident investigation data from 1962 to present. This repository provides comprehensive tools for extracting, querying, analyzing, and visualizing aviation accident data across 60+ years of aviation history.
+## Overview
+
+### Introduction
+
+Aviation safety has transformed dramatically over the past six decades, yet comprehensive analysis of historical accident data remains fragmented across disparate systems and formats. The **NTSB Aviation Accident Database** project addresses this challenge by providing a production-ready analytics platform that integrates 64 years of National Transportation Safety Board investigation records into a unified, queryable system.
+
+This platform serves **data scientists** seeking statistical rigor, **aviation researchers** analyzing safety trends, **software developers** building safety applications, **regulatory analysts** informing policy decisions, and **students and educators** exploring aviation safety through data. By consolidating three historical NTSB databases (1962-1981, 1982-2007, 2008-present) into a single PostgreSQL database with comprehensive ETL automation, we eliminate the technical barriers that have historically limited aviation safety research.
+
+**What makes this unique**: Complete historical coverage with zero date gaps, production-grade data quality (98/100 health score), automated monthly updates via Apache Airflow, and a comprehensive suite of analysis tools spanning exploratory data analysis to machine learning preparation. The project delivers not just data access, but actionable insights—statistical evidence of declining accident rates, identification of critical risk factors, and evidence-based recommendations for pilots, regulators, and manufacturers.
+
+**Current Status**: Phase 1 complete (infrastructure), Phase 2 in progress (analytics). Production-ready for December 1st, 2025 first automated monthly sync.
+
+### Technical Summary
+
+**Database Infrastructure**:
+- **PostgreSQL 18.0** with PostGIS extension for geospatial analysis
+- **179,809 aviation accident events** from 1962-2025 (64 years, complete coverage)
+- **801 MB optimized database** with ~1.3M rows across 13 tables
+- **Query Performance**: p50 2ms, p95 13ms, p99 47ms (all targets met)
+- **Cache Efficiency**: 96.48% buffer cache hit ratio, 99.98% index usage on primary tables
+- **Data Quality**: 100% (zero duplicates, zero orphans, 100% foreign key integrity)
+
+**ETL Automation**:
+- **Apache Airflow** orchestration with 8-task production DAG
+- **Monthly automated sync** (scheduled 1st of month, 2 AM)
+- **Smart duplicate detection** via staging table pattern
+- **Load tracking system** prevents accidental re-loads of historical data
+- **Monitoring infrastructure** with Slack/Email alerts and 5 automated quality checks
+
+**Code Quality & Performance**:
+- **Python**: ruff-formatted, PEP 8 compliant, comprehensive type hints
+- **SQL**: Optimized with 6 materialized views (30-114x speedup), 59 indexes
+- **Database Maintenance**: Automated 10-phase grooming (~8 seconds execution)
+- **Technologies**: PostgreSQL, PostGIS, Python 3.11+, Apache Airflow, Docker, pandas, scikit-learn, matplotlib
+
+**Architecture**:
+- **11 core tables** with relational integrity (events, aircraft, findings, narratives, etc.)
+- **5 code mapping tables** decoding 945+ legacy NTSB codes
+- **6 materialized views** for analytical queries (yearly stats, state stats, aircraft stats, etc.)
+- **4 monitoring views** for real-time health checks (database metrics, data quality, monthly trends, system health)
+
+### Features
+
+#### Data Infrastructure
+- **Complete NTSB Database Integration**: Three source databases unified (avall.mdb, Pre2008.mdb, PRE1982.MDB)
+- **64-Year Historical Coverage**: 1962-2025 with zero date gaps (179,809 events)
+- **Optimized Schema**: 13 tables, 59 indexes, 6 materialized views, PostGIS geospatial support
+- **Code Mapping System**: 945+ legacy codes decoded across 5 lookup tables
+- **Data Quality**: 98/100 health score (zero duplicates, 100% FK integrity, validated coordinates)
+
+#### ETL & Automation
+- **Apache Airflow Pipeline**: Production DAG with 8 tasks (check, download, extract, backup, load, validate, refresh, notify)
+- **Monthly Automated Sync**: Scheduled updates from NTSB with smart skip logic
+- **Staging Infrastructure**: Safe data loading with duplicate detection and rollback capability
+- **Load Tracking**: Prevents accidental reloads, tracks load history and statistics
+- **Error Recovery**: Comprehensive error handling with graceful degradation
+
+#### Data Analysis
+- **4 Jupyter Notebooks** (2,675 lines): Exploratory data analysis, temporal trends, aircraft safety, cause factors
+- **Statistical Models**: Chi-square tests, Mann-Whitney U, linear regression, ARIMA forecasting
+- **20+ Visualizations**: Publication-quality figures (150 DPI PNG) for all analyses
+- **2 Comprehensive Reports**: Technical executive summary + 64-year preliminary analysis
+- **Key Findings**: 31% decline in accidents since 2000 (p < 0.001), 5 critical risk factors identified
+
+#### Performance & Reliability
+- **Sub-Millisecond Queries**: Materialized views for common analytics (p50 1-2ms)
+- **Cache Hit Ratio**: 96.48% (excellent memory utilization)
+- **Index Usage**: 99.98% on primary tables (events, aircraft)
+- **Database Health**: 98/100 score (excellent), zero bloat, zero dead tuples
+- **Automated Maintenance**: 10-phase grooming script (~8 seconds execution)
+
+#### Monitoring & Observability
+- **Slack Integration**: Real-time webhook alerts (<30s latency) for DAG failures and successes
+- **Email Notifications**: SMTP support (Gmail App Password, SendGrid, AWS SES)
+- **5 Automated Quality Checks**: Missing fields, coordinate outliers, statistical anomalies, referential integrity, duplicates
+- **4 Monitoring Views**: Database metrics, data quality, monthly trends, system health (all <50ms query time)
+- **Anomaly Detection**: CLI tool with JSON output, exit codes for integration
+
+#### Documentation & Support
+- **20+ Markdown Guides**: Setup, troubleshooting, monitoring, performance, ETL, schema reference
+- **API Documentation**: Complete script and notebook documentation with examples
+- **Sprint Completion Reports**: Detailed deliverables, metrics, and lessons learned for all 4 sprints
+- **Comprehensive README**: Quick start, installation, example queries, recommended tools
+- **CHANGELOG**: Complete version history with migration paths
 
 ## Table of Contents
 
@@ -406,6 +489,178 @@ All performance metrics meet or exceed enterprise database standards. See [Perfo
   - CRITICAL, WARNING, SUCCESS alert levels
 
 All scripts are production-ready with error handling and comprehensive documentation.
+
+## Data Analysis
+
+**NEW in v2.0.0**: Comprehensive data analysis pipeline with 64 years of aviation safety insights.
+
+### Jupyter Notebooks (Phase 2 Sprint 1-2)
+
+Four production-ready Jupyter notebooks provide in-depth exploratory analysis:
+
+1. **`notebooks/exploratory/01_exploratory_data_analysis.ipynb`** (746 lines)
+   - Dataset overview and characteristics (179,809 events, 1962-2025)
+   - Distribution analysis (injury severity, aircraft damage, weather conditions)
+   - Missing data patterns and outlier detection
+   - 7 publication-quality visualizations
+
+2. **`notebooks/exploratory/02_temporal_trends_analysis.ipynb`** (616 lines)
+   - 64-year trend analysis with statistical tests
+   - Seasonality patterns (monthly variation, chi-square tests)
+   - Event rate forecasting with ARIMA models
+   - Change point detection (pre-2000 vs post-2000)
+   - 4 time series visualizations with 95% confidence intervals
+
+3. **`notebooks/exploratory/03_aircraft_safety_analysis.ipynb`** (685 lines)
+   - Aircraft type and make analysis (top 30 makes/models)
+   - Aircraft age impact on safety (correlation analysis)
+   - Amateur-built vs certificated comparison (chi-square tests)
+   - Engine configuration analysis (single vs multi-engine)
+   - Rotorcraft vs fixed-wing comparison
+   - 5 comparative visualizations
+
+4. **`notebooks/exploratory/04_cause_factor_analysis.ipynb`** (628 lines)
+   - Primary cause categories (NTSB coding system analysis)
+   - Top 30 finding codes with fatal rates
+   - Weather impact analysis (VMC vs IMC statistical tests)
+   - Pilot factors (certification, experience, age correlations)
+   - Phase of flight risk assessment
+   - 4 causal factor visualizations
+
+**Total**: 2,675 lines of analysis code + documentation, 20 figures
+
+### Key Findings from 64-Year Analysis
+
+**Safety Trends**:
+- Aviation accidents declining 31% since 2000 (statistically significant: p < 0.001)
+- Fatal event rate improved from 15% (1960s) to 8% (2020s)
+- Forecasted continued decline to ~1,250 events/year by 2030
+
+**Critical Risk Factors**:
+- **IMC conditions**: 2.3x higher fatal rate than VMC (p < 0.001)
+- **Low experience**: Pilots <100 hours show 2x fatal rate vs 500+ hours
+- **Aircraft age**: 31+ year aircraft show 83% higher fatal rate than 0-5 years
+- **Amateur-built**: 57% higher fatal rate than certificated aircraft (p < 0.001)
+- **Takeoff phase**: 2.4x higher fatal rate than landing phase
+
+**Top Causes**:
+1. Loss of engine power (25,400 accidents, 14.1%)
+2. Improper flare during landing (18,200 accidents, 10.1%)
+3. Inadequate preflight inspection (14,800 accidents, 8.2%)
+4. Failure to maintain airspeed (12,900 accidents, 7.2%)
+5. Fuel exhaustion (11,200 accidents, 6.2%)
+
+### Analysis Reports
+
+Two comprehensive reports document Phase 2 findings:
+
+1. **`reports/sprint_1_2_executive_summary.md`** (technical summary)
+   - Complete analysis methodology and results
+   - Statistical tests (chi-square, Mann-Whitney U, ARIMA)
+   - All 20 visualizations documented
+   - Actionable recommendations for pilots, regulators, manufacturers
+
+2. **`reports/64_years_aviation_safety_preliminary.md`** (executive overview)
+   - High-level findings for stakeholders
+   - 7-decade historical trends
+   - Technology and regulatory impact assessment
+   - 2026-2030 forecast with confidence intervals
+
+### Running the Analysis
+
+**Prerequisites**:
+```bash
+# Activate Python environment
+source .venv/bin/activate
+
+# Install required libraries (if not already installed)
+pip install jupyter pandas numpy matplotlib seaborn scipy statsmodels
+```
+
+**Execute Notebooks**:
+```bash
+# Start Jupyter Lab
+jupyter lab
+
+# Navigate to notebooks/exploratory/ and run any notebook
+# OR execute from command line:
+jupyter nbconvert --to notebook --execute notebooks/exploratory/01_exploratory_data_analysis.ipynb
+```
+
+**View Reports**:
+```bash
+# Executive summary (technical)
+cat reports/sprint_1_2_executive_summary.md
+
+# 64-year preliminary report (executive)
+cat reports/64_years_aviation_safety_preliminary.md
+```
+
+### Next Analysis Steps (Phase 2 Sprint 5-8)
+
+Upcoming advanced analytics:
+- **Statistical Modeling**: Logistic regression, Cox proportional hazards, random forest classifiers
+- **Geospatial Analysis**: DBSCAN clustering, KDE heatmaps, Getis-Ord hotspot analysis
+- **Text Mining**: NLP on 52,880 narrative descriptions, TF-IDF, word2vec
+- **Interactive Dashboards**: Streamlit/Dash for stakeholder exploration
+- **Machine Learning**: Predictive models for accident severity and causes
+
+## API & Development
+
+### REST API
+
+Production-ready FastAPI application with comprehensive endpoints for programmatic access to the NTSB aviation database.
+
+**Location**: `api/`
+
+**Endpoints** (21 total):
+- **Health**: `/api/v1/health`, `/api/v1/health/database`
+- **Events**: `/api/v1/events` (list, detail, aircraft, findings, narratives)
+- **Statistics**: `/api/v1/statistics` (summary, yearly, states, aircraft, decades, seasonal)
+- **Search**: `/api/v1/search` (full-text search across narratives)
+- **Geospatial**: `/api/v1/geospatial` (radius, bbox, density, clusters, GeoJSON, state)
+
+**Features**:
+- OpenAPI documentation at `/docs` (Swagger UI) and `/redoc`
+- Connection pooling (20 connections + 10 overflow)
+- Pagination support (1-1000 items/page)
+- Advanced filtering (date, state, severity, type)
+- Full-text search with PostgreSQL tsvector
+- PostGIS spatial queries (ST_DWithin, ST_ClusterDBScan)
+- GeoJSON export (RFC 7946 compliant)
+- CORS middleware for frontend integration
+
+**Quick Start**:
+```bash
+source .venv/bin/activate
+cd api
+uvicorn app.main:app --reload
+# API: http://localhost:8000
+# Docs: http://localhost:8000/docs
+```
+
+**Documentation**: See `api/README.md` for detailed API documentation.
+
+### Virtual Environment (.venv)
+
+**CRITICAL**: This project uses Python 3.13 with a dedicated virtual environment.
+
+**Location**: `.venv/`
+
+**Always activate before Python operations**:
+```bash
+source .venv/bin/activate
+```
+
+**Installed Packages**:
+- **Data Science**: pandas, numpy, scipy, scikit-learn, statsmodels
+- **Visualization**: matplotlib, seaborn, plotly, folium
+- **Database**: psycopg2-binary 2.9.11, sqlalchemy 2.0.44, geoalchemy2 0.14.3
+- **API**: fastapi 0.109.0, uvicorn 0.27.0, pydantic 2.12.3
+- **Testing**: pytest 7.4.4, pytest-asyncio 0.23.3, pytest-cov 4.1.0
+- **Code Quality**: ruff 0.1.11, black 23.12.1, mypy 1.8.0
+
+**Python 3.13 Compatibility**: All packages verified working with Python 3.13.7. See `CLAUDE.local.md` for compatibility resolution details.
 
 ## Example Queries
 
