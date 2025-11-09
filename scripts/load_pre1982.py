@@ -931,13 +931,15 @@ class PRE1982Loader:
             col_list = ", ".join(event_cols)
 
             # Merge events (only new ev_id values)
-            cur.execute(f"""
+            cur.execute(
+                f"""
                 INSERT INTO events ({col_list})
                 SELECT {col_list} FROM staging.events s
                 WHERE NOT EXISTS (
                     SELECT 1 FROM events e WHERE e.ev_id = s.ev_id
                 )
-            """)
+            """
+            )
             new_events = cur.rowcount
             logger.info(f"  ✓ Merged {new_events:,} new events")
 
@@ -964,11 +966,13 @@ class PRE1982Loader:
                     # Fallback for tables without aircraft_key
                     where_clause = f"WHERE NOT EXISTS (SELECT 1 FROM {table} e WHERE e.ev_id = s.ev_id)"
 
-                cur.execute(f"""
+                cur.execute(
+                    f"""
                     INSERT INTO {table} ({col_list})
                     SELECT {col_list} FROM staging.{table} s
                     {where_clause}
-                """)
+                """
+                )
                 rows = cur.rowcount
                 logger.info(f"  ✓ Merged {rows:,} {table} rows")
 
