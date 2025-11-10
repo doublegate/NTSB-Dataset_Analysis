@@ -24,6 +24,12 @@ data/*.db
 data/*.sqlite
 data/*.sqlite3
 
+# Generated geospatial data (large files)
+data/*_clusters.geojson
+data/*_hotspots.geojson
+data/*_summary.json
+data/*_stats.json
+
 # Python
 .venv/
 venv/
@@ -69,6 +75,10 @@ dmypy.json
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 */.ipynb_checkpoints/*
+*_executed.ipynb
+**/*_executed.ipynb
+notebooks/*/tests/
+notebooks/**/tests/
 
 # IPython
 profile_default/
@@ -153,6 +163,15 @@ results/
 .Rhistory
 .RData
 .Rproj.user
+
+# Machine Learning Models (binary files, regenerated from notebooks)
+models/*.model
+models/*.npy
+models/*.pkl
+models/*.dict
+models/*.bin
+models/*.h5
+models/*.keras
 
 # Rust/Cargo (if compiling Rust tools locally)
 target/
