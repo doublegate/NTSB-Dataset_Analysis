@@ -6,7 +6,7 @@ streamlit==1.51.0
 
 # Visualization
 plotly==5.24.1
-folium==0.18.0
+folium==0.20.0
 streamlit-folium==0.23.1
 
 # Data Processing (should already be in main .venv)
