@@ -22,7 +22,7 @@ shapely==2.0.2  # Has Python 3.13 wheels
 
 # Validation
 pydantic>=2.8.0  # v2.8+ required for Python 3.13 support (currently 2.12.3)
-pydantic-settings==2.1.0
+pydantic-settings==2.11.0
 email-validator==2.1.0
 
 # HTTP & CORS
@@ -41,5 +41,8 @@ black==25.11.0
 mypy==1.8.0
 
 # Documentation
-python-jose[cryptography]==3.3.0
+python-jose==3.4.0
 passlib[bcrypt]==1.7.4
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+dnspython>=2.6.1 # not directly required, pinned by Snyk to avoid a vulnerability
+numpy>=1.22.0 # not directly required, pinned by Snyk to avoid a vulnerability
