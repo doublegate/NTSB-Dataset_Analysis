@@ -5,7 +5,7 @@
 # Core Framework
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-python-multipart==0.0.6
+python-multipart==0.0.7
 
 # Database
 sqlalchemy==2.0.44  # Upgraded from 2.0.25 for Python 3.13 compatibility
@@ -41,5 +41,8 @@ black==23.12.1
 mypy==1.8.0
 
 # Documentation
-python-jose[cryptography]==3.3.0
+python-jose==3.4.0
 passlib[bcrypt]==1.7.4
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+dnspython>=2.6.1 # not directly required, pinned by Snyk to avoid a vulnerability
+numpy>=1.22.0 # not directly required, pinned by Snyk to avoid a vulnerability
