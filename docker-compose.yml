@@ -1,0 +1,181 @@
+# NTSB Aviation Accident Database - Docker Compose Configuration
+# Phase 3 Sprint 1: Production-ready containerized stack
+#
+# Services:
+#   - postgres: PostgreSQL 18 with PostGIS (database)
+#   - redis: Redis 7 (caching layer for API)
+#   - api: FastAPI REST API
+#   - dashboard: Streamlit interactive dashboard
+#
+# Usage:
+#   docker-compose build                 # Build all images
+#   docker-compose up -d                 # Start all services
+#   docker-compose ps                    # Check service status
+#   docker-compose logs -f api           # View API logs
+#   docker-compose down                  # Stop all services
+#   docker-compose down -v               # Stop and remove volumes (data loss!)
+
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL Database (Primary Data Store)
+  # ============================================
+  postgres:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: ntsb-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ntsb_aviation}
+      POSTGRES_USER: ${POSTGRES_USER:-ntsb_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # Persistent data storage
+      - postgres_data:/var/lib/postgresql/data
+      # Custom configuration (optional, can override)
+      # - ./database/postgresql.conf:/etc/postgresql/postgresql.conf
+      # Initialization scripts (run on first startup)
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      # Optional: Schema and optimization scripts
+      - ./scripts:/scripts:ro
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - ntsb-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ntsb_user} -d ${POSTGRES_DB:-ntsb_aviation}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ============================================
+  # Redis Cache (API Performance Layer)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: ntsb-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - ntsb-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - redis_data:/data
+
+  # ============================================
+  # FastAPI REST API
+  # ============================================
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: ntsb-api
+    restart: unless-stopped
+    environment:
+      # Database connection
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ntsb_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-ntsb_aviation}
+      # Redis connection
+      REDIS_URL: redis://redis:6379/0
+      # API configuration
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8501,http://localhost:3000}
+      # Security (for future auth implementation)
+      # SECRET_KEY: ${SECRET_KEY}
+      # JWT_ALGORITHM: HS256
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-8000}:8000"
+    networks:
+      - ntsb-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    # Resource limits (optional, adjust based on your system)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # ============================================
+  # Streamlit Dashboard (Interactive UI)
+  # ============================================
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: ntsb-dashboard
+    restart: unless-stopped
+    environment:
+      # API connection (internal Docker network)
+      API_BASE_URL: http://api:8000
+      # Streamlit configuration
+      STREAMLIT_SERVER_PORT: 8501
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+      STREAMLIT_SERVER_HEADLESS: "true"
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${DASHBOARD_PORT:-8501}:8501"
+    networks:
+      - ntsb-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+# ============================================
+# Named Volumes (Persistent Data)
+# ============================================
+volumes:
+  postgres_data:
+    name: ntsb-postgres-data
+    driver: local
+  redis_data:
+    name: ntsb-redis-data
+    driver: local
+
+# ============================================
+# Networks (Service Isolation)
+# ============================================
+networks:
+  ntsb-network:
+    name: ntsb-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
