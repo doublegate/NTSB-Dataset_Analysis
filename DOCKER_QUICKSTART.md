@@ -145,7 +145,7 @@ docker-compose up -d
 
 ```bash
 # Copy loading script into container
-docker-compose cp scripts/load_with_staging.py api:/app/
+docker cp scripts/load_with_staging.py ntsb-api:/app/
 
 # Run loading script
 docker-compose exec api python scripts/load_with_staging.py --source /data/avall.mdb
