@@ -1,5 +1,5 @@
-# NTSB Aviation Accident API - Production Dockerfile
-# Phase 3 Sprint 1: Multi-stage build for optimized image size (<300MB)
+# NTSB Aviation Accident Dashboard - Production Dockerfile
+# Phase 3 Sprint 1: Streamlit-optimized container (<400MB)
 
 # ============================================
 # Stage 1: Builder (install dependencies)
@@ -14,7 +14,6 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     gcc \
-    libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install to user site-packages
@@ -27,15 +26,14 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 FROM python:3.13-slim
 
 LABEL maintainer="NTSB Aviation Database Project"
-LABEL description="REST API for NTSB aviation accident data (1962-2025)"
+LABEL description="Interactive Streamlit dashboard for NTSB aviation accident data"
 LABEL version="1.0.0"
 
 WORKDIR /app
 
-# Install runtime dependencies only
+# Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     --no-install-recommends \
-    postgresql-client \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -43,27 +41,29 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /root/.local /root/.local
 
 # Copy application code
-COPY app/ app/
+COPY . .
 
 # Environment variables
 ENV PATH=/root/.local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH=/app
+    STREAMLIT_SERVER_PORT=8501 \
+    STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
+    STREAMLIT_SERVER_HEADLESS=true \
+    STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
 
 # Create non-root user for security
-RUN useradd -m -u 1000 apiuser && \
-    chown -R apiuser:apiuser /app
+RUN useradd -m -u 1000 streamlit && \
+    chown -R streamlit:streamlit /app
 
-USER apiuser
+USER streamlit
 
-# Expose API port
-EXPOSE 8000
+# Expose Streamlit port
+EXPOSE 8501
 
-# Health check (FastAPI health endpoint)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v1/health/ || exit 1
+# Health check (Streamlit health endpoint)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
-# Run application with uvicorn
-# Use 1 worker for development, scale with replicas in production
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Run Streamlit application
+CMD ["streamlit", "run", "app.py"]
