@@ -1,13 +1,16 @@
 {
   "global_morans_i": {
-    "I": 0.011055962393787897,
-    "z_score": 6.633274065766421,
-    "p_value": 3.2832137367254625e-11
+    "I": 0.011066049285074953,
+    "expected_I": -1.3131631473894317e-05,
+    "z_score": 6.639318745083747,
+    "p_value": 3.151362586285453e-11,
+    "interpretation": "Positive spatial autocorrelation",
+    "significant": true
   },
   "lisa_clusters": {
-    "Not Significant": 70257,
-    "LH (Low-High)": 3002,
-    "HL (High-Low)": 1636,
-    "HH (High-High)": 1258
+    "Not Significant": 71525,
+    "LH (Low-High)": 2643,
+    "HH (High-High)": 1130,
+    "HL (High-Low)": 855
   }
 }
