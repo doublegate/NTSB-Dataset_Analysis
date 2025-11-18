@@ -6,8 +6,8 @@ streamlit==1.51.0
 
 # Visualization
 plotly==5.24.1
-folium==0.18.0
-streamlit-folium==0.23.1
+folium==0.20.0
+streamlit-folium==0.25.3
 
 # Data Processing (should already be in main .venv)
 pandas>=2.0.0

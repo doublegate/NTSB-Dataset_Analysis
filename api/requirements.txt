@@ -3,9 +3,9 @@
 # Python 3.13 Compatible (verified 2025-11-08)
 
 # Core Framework
-fastapi==0.109.0
+fastapi==0.121.1
 uvicorn[standard]==0.27.0
-python-multipart==0.0.6
+python-multipart==0.0.18
 
 # Database
 sqlalchemy==2.0.44  # Upgraded from 2.0.25 for Python 3.13 compatibility
@@ -22,7 +22,7 @@ shapely==2.0.2  # Has Python 3.13 wheels
 
 # Validation
 pydantic>=2.8.0  # v2.8+ required for Python 3.13 support (currently 2.12.3)
-pydantic-settings==2.1.0
+pydantic-settings==2.11.0
 email-validator==2.1.0
 
 # HTTP & CORS
@@ -37,9 +37,12 @@ httpx==0.26.0
 
 # Code Quality
 ruff==0.1.11
-black==23.12.1
+black==25.11.0
 mypy==1.8.0
 
 # Documentation
-python-jose[cryptography]==3.3.0
+python-jose==3.4.0
 passlib[bcrypt]==1.7.4
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+dnspython>=2.6.1 # not directly required, pinned by Snyk to avoid a vulnerability
+numpy>=1.22.0 # not directly required, pinned by Snyk to avoid a vulnerability
