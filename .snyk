@@ -1,0 +1,13 @@
+# Snyk (https://snyk.io) policy file
+# https://docs.snyk.io/snyk-cli/test-for-vulnerabilities/the-.snyk-file
+version: v1.25.0
+
+ignore:
+  CVE-2026-2219:
+    - 'doublegate/NTSB-Dataset_Analysis:api/Dockerfile':
+        reason: >
+          CVE-2026-2219 affects dpkg 1.22.21 in the python:3.13-slim base image.
+          No upstream remediation is available as of 2026-03-07. Tracking for
+          resolution; suppress until fix is released or base image is updated.
+        expires: 2026-09-07T00:00:00.000Z
+        created: 2026-03-07T00:00:00.000Z
