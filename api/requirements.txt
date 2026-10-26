@@ -3,47 +3,46 @@
 # Python 3.13 Compatible (verified 2025-11-08)
 
 # Core Framework
-fastapi==0.121.1
+fastapi==0.162.0
 uvicorn[standard]==0.54.0
 python-multipart==0.0.32
 
 # Database
-sqlalchemy==2.0.44  # Upgraded from 2.0.25 for Python 3.13 compatibility
-psycopg2-binary==2.9.11  # Updated from 2.9.9, has Python 3.13 wheels
+sqlalchemy==2.0.55  # Upgraded from 2.0.25 for Python 3.13+ compatibility (2.0.x keeps psycopg2 default driver)
+psycopg2-binary==2.9.13  # Updated from 2.9.9, has Python 3.13+ wheels
 # asyncpg==0.29.0  # REMOVED: No Python 3.13 wheels, not used in codebase
 
 # Geospatial
-geoalchemy2==0.14.3
-shapely==2.0.2  # Has Python 3.13 wheels
+geoalchemy2==0.20.0
+shapely==2.2.0  # Has Python 3.13+ wheels
 
 # Data Processing (not needed for API - only for dashboard)
 # pandas==2.1.4
 # numpy==1.26.3
 
 # Validation
-pydantic>=2.8.0  # v2.8+ required for Python 3.13 support (currently 2.12.3)
-pydantic-settings==2.15.0
-email-validator==2.1.0
+pydantic>=2.14.1  # v2.8+ required for Python 3.13+ support
+pydantic-settings==2.16.1
+email-validator==2.3.0
 
 # HTTP & CORS
-python-dotenv==1.2.2
-httpx==0.26.0
+python-dotenv==1.2.4
+httpx==0.28.1
 
 # Testing
-pytest==9.0.3
-pytest-asyncio==0.23.3
+pytest==9.1.1
+pytest-asyncio==1.4.1
 pytest-cov==7.1.0
-httpx==0.26.0
 
 # Code Quality
-ruff==0.1.11
-black==26.3.1
-mypy==1.8.0
+ruff==0.17.2
+black==26.10.1
+mypy==2.4.0
 
-# Documentation
-python-jose==3.5.0
+# Documentation / Auth
+# python-jose==3.5.0  # REMOVED: Unused in codebase and affected by GHSA-3qf3-8w2g-rqmx
 passlib[bcrypt]==1.7.4
-zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
-dnspython>=2.6.1 # not directly required, pinned by Snyk to avoid a vulnerability
-numpy>=1.22.0 # not directly required, pinned by Snyk to avoid a vulnerability
-pyasn1>=0.6.2 # not directly required, pinned by Snyk to avoid a vulnerability
+zipp>=4.1.2 # not directly required, pinned by Snyk to avoid a vulnerability
+dnspython>=2.9.0 # not directly required, pinned by Snyk to avoid a vulnerability
+numpy>=2.5.4 # not directly required, pinned by Snyk to avoid a vulnerability
+pyasn1>=0.6.4 # not directly required, pinned by Snyk to avoid a vulnerability
