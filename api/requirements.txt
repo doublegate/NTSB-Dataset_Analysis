@@ -39,8 +39,8 @@ ruff==0.17.2
 black==26.10.1
 mypy==2.4.0
 
-# Documentation
-python-jose==3.5.0
+# Documentation / Auth
+# python-jose==3.5.0  # REMOVED: Unused in codebase and affected by GHSA-3qf3-8w2g-rqmx
 passlib[bcrypt]==1.7.4
 zipp>=4.1.2 # not directly required, pinned by Snyk to avoid a vulnerability
 dnspython>=2.9.0 # not directly required, pinned by Snyk to avoid a vulnerability
