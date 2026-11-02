@@ -37,7 +37,7 @@ pytest-cov==7.1.0
 # Code Quality
 ruff==0.17.2
 black==26.10.1
-mypy==2.4.0
+mypy==2.4.1
 
 # Documentation / Auth
 # python-jose==3.5.0  # REMOVED: Unused in codebase and affected by GHSA-3qf3-8w2g-rqmx
