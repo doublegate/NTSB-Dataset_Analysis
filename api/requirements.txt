@@ -21,7 +21,7 @@ shapely==2.2.0  # Has Python 3.13+ wheels
 # numpy==1.26.3
 
 # Validation
-pydantic>=2.14.1  # v2.8+ required for Python 3.13+ support
+pydantic>=2.14.2  # v2.8+ required for Python 3.13+ support
 pydantic-settings==2.16.1
 email-validator==2.3.0
 
