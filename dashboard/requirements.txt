@@ -17,4 +17,4 @@ numpy>=1.24.0
 psycopg2-binary>=2.9.13
 
 # Additional
-python-dateutil==2.9.0.post0
+python-dateutil==3.0.0
